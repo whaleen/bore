@@ -4,14 +4,32 @@ import NodeList from './components/NodeList'
 function App() {
   const [connectedNode, setConnectedNode] = useState(null)
 
-  const handleConnect = (node) => {
-    setConnectedNode(node)
-    localStorage.setItem('bore_selected_node', JSON.stringify(node))
+  const handleConnect = async (node) => {
+    try {
+      const userId = 'test-solana-pubkey' // Will come from wallet later
+      const response = await fetch('/.netlify/functions/select-node', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          node,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save node selection')
+      }
+
+      setConnectedNode(node)
+    } catch (error) {
+      console.error('Error saving node selection:', error)
+    }
   }
 
   const handleDisconnect = () => {
     setConnectedNode(null)
-    localStorage.removeItem('bore_selected_node')
   }
 
   return (

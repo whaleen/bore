@@ -1,4 +1,4 @@
-const { faker } = require('@faker-js/faker');
+const { faker } = require('@faker-js/faker')
 
 function generateFakeNodes(count) {
   return Array.from({ length: count }, () => ({
@@ -7,7 +7,7 @@ function generateFakeNodes(count) {
     country: faker.location.country(),
     countryCode: faker.location.countryCode(),
     ipAddress: faker.internet.ip()
-  }));
+  }))
 }
 
 exports.handler = async function (event, context) {
@@ -15,20 +15,20 @@ exports.handler = async function (event, context) {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json'
-  };
+  }
 
   try {
-    const nodes = generateFakeNodes(66);
+    const nodes = generateFakeNodes(60)
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify(nodes)
-    };
+    }
   } catch (error) {
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({ error: 'Failed to generate nodes' })
-    };
+    }
   }
-};
+}
