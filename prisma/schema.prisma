@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Node {
+  id          String   @id @default(uuid())
+  name        String
+  country     String
+  countryCode String
+  ipAddress   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relation to users who selected this node
+  selectedBy UserSelectedNode?
+}
+
+model UserSelectedNode {
+  userId    String   @id // Will be Solana public key
+  node      Node     @relation(fields: [nodeId], references: [id])
+  nodeId    String   @unique // One node can only be selected by one user at a time
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
