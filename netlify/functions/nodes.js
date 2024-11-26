@@ -18,7 +18,7 @@ exports.handler = async function (event, context) {
   };
 
   try {
-    const nodes = generateFakeNodes(6);
+    const nodes = generateFakeNodes(66);
     return {
       statusCode: 200,
       headers,

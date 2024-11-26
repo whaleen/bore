@@ -1,0 +1,29 @@
+.
+├── README.md
+├── eslint.config.js
+├── index.html
+├── netlify
+│   └── functions
+│       └── nodes.js
+├── netlify.toml
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── prisma
+│   └── schema.prisma
+├── public
+│   └── vite.svg
+├── src
+│   ├── App.css
+│   ├── App.jsx
+│   ├── assets
+│   │   └── react.svg
+│   ├── components
+│   │   └── NodeList.js
+│   ├── index.css
+│   └── main.jsx
+├── tailwind.config.js
+├── tree.txt
+└── vite.config.js
+
+8 directories, 19 files
