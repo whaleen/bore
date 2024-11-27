@@ -1,4 +1,6 @@
 // netlify/functions/update-user-preferences.js
+import prisma from './prisma'
+
 export const handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -8,6 +10,7 @@ export const handler = async (event, context) => {
 
   try {
     const { theme, userId } = JSON.parse(event.body)
+    console.log('Received request to update theme:', { theme, userId })
 
     if (!userId) {
       return {
@@ -23,6 +26,8 @@ export const handler = async (event, context) => {
       select: { theme: true }
     })
 
+    console.log('Updated user theme:', updatedUser)
+
     return {
       statusCode: 200,
       headers,
@@ -33,7 +38,7 @@ export const handler = async (event, context) => {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to update user preferences' })
+      body: JSON.stringify({ error: 'Failed to update user preferences', details: error.message })
     }
   }
 }

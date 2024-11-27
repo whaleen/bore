@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from './contexts/ThemeContext'
-import ThemeToggle from './components/ThemeToggle'
 import NodeList from './components/NodeList'
 import PrimaryNode from './components/PrimaryNode'
 import ToggleSwitch from './components/ToggleSwitch'
@@ -26,11 +25,12 @@ function App() {
   const [isEnabled, setIsEnabled] = useState(false)
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [setTheme] = useState('dark')
+  const [theme, setTheme] = useState('dark')
 
   useEffect(() => {
     const fetchLatestData = async () => {
       try {
+        console.log('Fetching latest data...')
         const [storedApiKey, storedUserId] = await Promise.all([
           getStoredApiKey(),
           getStoredUserId(),
@@ -52,6 +52,22 @@ function App() {
     }
     fetchLatestData()
   }, [])
+
+  if (isLoading) {
+    return (
+      <div className='flex justify-center items-center'>
+        <span className='loading loading-spinner text-primary'></span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='alert alert-error shadow-lg rounded-lg p-4 mb-6'>
+        <span>{error}</span>
+      </div>
+    )
+  }
 
   const fetchUserNodes = async (currentUserId, currentApiKey) => {
     try {
@@ -123,11 +139,16 @@ function App() {
         throw new Error(data.error || 'Failed to verify code')
       }
 
-      // Store both API key and userId
+      // Store API key and userId
       await setStoredCredentials(data.apiKey, data.userId)
       setApiKey(data.apiKey)
       setUserId(data.userId)
       setIsLinked(true)
+
+      // Store connection ID if available
+      if (data.connection?.id) {
+        await chrome.storage.local.set({ connectionId: data.connection.id })
+      }
 
       // Fetch initial nodes
       await fetchUserNodes(data.userId, data.apiKey)
@@ -174,6 +195,44 @@ function App() {
     }
   }
 
+  const handleUnlink = async () => {
+    try {
+      if (userId && apiKey) {
+        const storage = await chrome.storage.local.get('connectionId')
+        const response = await fetch(
+          `${API_URL}/.netlify/functions/manage-extension-connection`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              action: 'revoke',
+              userId,
+              connectionId: storage.connectionId,
+            }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to revoke connection')
+        }
+      }
+
+      // Clear stored credentials
+      await chrome.storage.local.clear()
+      setApiKey(null)
+      setUserId(null)
+      setIsLinked(false)
+      setPrimaryNode(null)
+      setNodes([])
+    } catch (error) {
+      console.error('Error unlinking:', error)
+      setError('Failed to unlink extension')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className='flex justify-center items-center'>
@@ -183,12 +242,10 @@ function App() {
   }
 
   return (
-    <ThemeProvider>
+    <ThemeProvider initialTheme={theme}>
       <div className='bore-proxy-extension min-h-screen bg-base-100 text-base-content p-6 rounded-xl shadow-lg'>
         <h1 className='text-3xl font-bold mb-6 text-primary'>Bore Proxy</h1>
-        <div className='mb-6'>
-          <ThemeToggle />
-        </div>
+
         {error && (
           <div className='alert alert-error shadow-lg rounded-lg p-4 mb-6'>
             <span>{error}</span>
@@ -197,15 +254,24 @@ function App() {
 
         {isLinked ? (
           <div>
+            <button
+              onClick={handleUnlink}
+              className='btn btn-error btn-block mb-6'
+            >
+              Unlink Extension
+            </button>
+
             <div className='mb-6'>
               <ToggleSwitch
                 enabled={isEnabled}
                 onToggle={handleToggleProxy}
               />
             </div>
+
             <div className='mb-6'>
               <PrimaryNode node={primaryNode} />
             </div>
+
             <div className='mb-6'>
               <NodeList
                 nodes={nodes}

@@ -2,30 +2,35 @@
   "name": "bore-proxy-extension",
   "version": "1.0.0",
   "description": "BORE dVPN Chrome Extension",
+  "type": "module",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
-    "watch": "webpack --watch --config webpack.config.js",
-    "dev": "webpack --config webpack.config.js --watch --mode=development"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
   },
   "dependencies": {
     "daisyui": "^4.12.14",
+    "lucide-react": "^0.263.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
-    "@babel/preset-react": "^7.25.9",
+    "@crxjs/vite-plugin": "^2.0.0-beta.23",
+    "@eslint/js": "^9.15.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
-    "babel-loader": "^9.2.1",
-    "copy-webpack-plugin": "^12.0.2",
-    "css-loader": "^6.11.0",
-    "dotenv-webpack": "^8.1.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "globals": "^15.12.0",
     "postcss": "^8.4.49",
-    "postcss-loader": "^8.1.1",
-    "style-loader": "^3.3.4",
+    "rollup-plugin-copy": "^3.5.0",
     "tailwindcss": "^3.4.15",
-    "webpack": "^5.96.1",
-    "webpack-cli": "^5.1.4"
+    "vite": "^5.1.0"
   }
 }

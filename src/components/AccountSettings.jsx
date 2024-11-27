@@ -1,3 +1,4 @@
+// src/components/AccountSettings.jsx
 import { useEffect, useState } from 'react'
 import { useTheme } from './ThemeContext'
 import { Sun, Moon, Laptop, X, RefreshCw } from 'lucide-react'
@@ -235,11 +236,14 @@ function AccountSettings() {
       <div className='mb-8 p-6 bg-base-200 rounded-lg'>
         <h2 className='text-xl font-semibold mb-4'>Chrome Extension</h2>
 
-        {connections && connections.length > 0 ? (
+        {connections &&
+        connections.filter((conn) => conn?.isActive).length > 0 ? (
           <div className='space-y-4'>
             <h3 className='text-lg font-medium mb-2'>Connected Devices</h3>
             {connections
-              .filter((connection) => connection !== null)
+              .filter(
+                (connection) => connection !== null && connection.isActive
+              )
               .map((connection) => (
                 <div
                   key={connection.id}

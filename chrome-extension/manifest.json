@@ -6,10 +6,11 @@
   "permissions": ["storage", "proxy", "webRequest"],
   "host_permissions": ["*://*/*", "https://*.netlify.app/*"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background.js",
+    "type": "module"
   },
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "index.html",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
