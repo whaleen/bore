@@ -3,7 +3,7 @@
 // const ct = require('countries-and-timezones')
 
 // use imports for the PrismaClient and countries-and-timezones
-import { PrismaClient } from '@prisma/client'
+import prisma from './prisma'
 import ct from 'countries-and-timezones'
 
 

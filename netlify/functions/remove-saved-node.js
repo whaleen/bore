@@ -1,5 +1,5 @@
 // netlify/functions/remove-saved-node.js
-const { PrismaClient } = require('@prisma/client')
+import prisma from './prisma'
 const prisma = new PrismaClient()
 
 exports.handler = async function (event, context) {

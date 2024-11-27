@@ -1,5 +1,5 @@
 // netlify/functions/generate-link-code.js
-import { PrismaClient } from '@prisma/client'
+import prisma from './prisma'
 
 // Initialize Prisma Client outside the handler
 const prisma = new PrismaClient()

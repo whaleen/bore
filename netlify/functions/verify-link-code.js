@@ -1,5 +1,5 @@
 // netlify/functions/verify-link-code.js
-import { PrismaClient } from '@prisma/client'
+import prisma from './prisma'
 import crypto from 'crypto'
 const prisma = new PrismaClient()
 

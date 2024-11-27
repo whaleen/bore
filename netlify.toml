@@ -1,10 +1,7 @@
 [build]
-  command = "npx prisma generate && npm run build"
-  functions = "netlify/functions"
-  publish = "dist"
+command = "npx prisma generate && npm run build"
+functions = "netlify/functions"
+publish = "dist"
 
 [functions]
-  node_bundler = "esbuild"
-
-[[plugins]]
-  package = "@netlify/plugin-prisma"
+node_bundler = "esbuild"

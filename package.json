@@ -7,9 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:generate": "prisma generate"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@faker-js/faker": "^9.2.0",
