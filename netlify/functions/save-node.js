@@ -1,7 +1,7 @@
 // netlify/functions/save-node.js
 import prisma from './prisma'
 
-exports.handler = async function (event, context) {
+export const handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -11,7 +11,6 @@ exports.handler = async function (event, context) {
   try {
     const { userId, nodeId } = JSON.parse(event.body)
 
-    // Check if user exists, if not create them
     let user = await prisma.user.findUnique({
       where: { id: userId },
     })
@@ -20,12 +19,11 @@ exports.handler = async function (event, context) {
       user = await prisma.user.create({
         data: {
           id: userId,
-          name: `User-${userId.slice(0, 6)}`, // Create a temporary name
+          name: `User-${userId.slice(0, 6)}`,
         },
       })
     }
 
-    // Check if node is already saved
     const existingSave = await prisma.userSavedNode.findUnique({
       where: {
         userId_nodeId: {
@@ -43,17 +41,15 @@ exports.handler = async function (event, context) {
       }
     }
 
-    // Check if this is the user's first saved node
     const isFirstNode = !(await prisma.userSavedNode.findFirst({
       where: { userId },
     }))
 
-    // Save the node for the user
     const savedNode = await prisma.userSavedNode.create({
       data: {
         userId,
         nodeId,
-        isPrimary: isFirstNode, // Make primary if it's the first node
+        isPrimary: isFirstNode,
       },
       include: {
         node: true,

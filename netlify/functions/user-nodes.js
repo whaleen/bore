@@ -1,7 +1,7 @@
 // netlify/functions/user-nodes.js
 import prisma from './prisma'
 
-exports.handler = async function (event, context) {
+export const handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',

@@ -1,7 +1,7 @@
 // netlify/functions/set-primary-node.js
 import prisma from './prisma'
 
-exports.handler = async function (event, context) {
+export const handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -11,7 +11,6 @@ exports.handler = async function (event, context) {
   try {
     const { userId, nodeId } = JSON.parse(event.body)
 
-    // First, unset any existing primary node
     await prisma.userSavedNode.updateMany({
       where: {
         userId,
@@ -22,7 +21,6 @@ exports.handler = async function (event, context) {
       },
     })
 
-    // Then set the new primary node
     const updatedNode = await prisma.userSavedNode.update({
       where: {
         userId_nodeId: {
