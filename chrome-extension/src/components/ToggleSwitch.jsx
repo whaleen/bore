@@ -3,16 +3,16 @@ import React from 'react'
 
 function ToggleSwitch({ enabled, onToggle }) {
   return (
-    <div className='switch-container'>
-      <label className='switch'>
+    <div className='flex items-center space-x-4 flex-col justify-center'>
+      <label className='toggle toggle-primary'>
         <input
           type='checkbox'
           checked={enabled}
           onChange={(e) => onToggle(e.target.checked)}
+          className='toggle-input'
         />
-        <span className='slider round'></span>
       </label>
-      <span className='switch-label'>
+      <span className='mt-2 text-sm text-neutral'>
         {enabled ? 'Connected' : 'Disconnected'}
       </span>
     </div>

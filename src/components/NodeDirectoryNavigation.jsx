@@ -21,34 +21,22 @@ function NodeDirectoryNavigation({ onFiltersChange }) {
   return (
     <div className='mb-6 space-y-4'>
       {/* Status Filters */}
-      <div className='flex gap-2 p-1 bg-gray-800 rounded-lg w-fit'>
+      <div className='btn-group'>
         <button
           onClick={() => handleFilterChange('status', 'all')}
-          className={`px-4 py-2 rounded-md transition ${
-            filters.status === 'all'
-              ? 'bg-gray-600 text-white'
-              : 'text-gray-400 hover:text-white'
-          }`}
+          className={`btn ${filters.status === 'all' ? 'btn-active' : ''}`}
         >
           All Nodes
         </button>
         <button
           onClick={() => handleFilterChange('status', 'active')}
-          className={`px-4 py-2 rounded-md transition ${
-            filters.status === 'active'
-              ? 'bg-gray-600 text-white'
-              : 'text-gray-400 hover:text-white'
-          }`}
+          className={`btn ${filters.status === 'active' ? 'btn-active' : ''}`}
         >
           Active
         </button>
         <button
           onClick={() => handleFilterChange('status', 'inactive')}
-          className={`px-4 py-2 rounded-md transition ${
-            filters.status === 'inactive'
-              ? 'bg-gray-600 text-white'
-              : 'text-gray-400 hover:text-white'
-          }`}
+          className={`btn ${filters.status === 'inactive' ? 'btn-active' : ''}`}
         >
           Inactive
         </button>
@@ -58,7 +46,7 @@ function NodeDirectoryNavigation({ onFiltersChange }) {
         {/* Search Field */}
         <div className='relative flex-1 min-w-[200px]'>
           <Search
-            className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'
+            className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500'
             size={20}
           />
           <input
@@ -66,7 +54,7 @@ function NodeDirectoryNavigation({ onFiltersChange }) {
             placeholder='Search by name, country, or region...'
             value={filters.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            className='w-full pl-10 pr-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none'
+            className='input input-bordered w-full pl-10'
           />
         </div>
 

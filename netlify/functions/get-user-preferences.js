@@ -9,9 +9,7 @@ export const handler = async (event, context) => {
   }
 
   try {
-    // Extract user ID from Authorization header or query params
-    const userId = event.headers.authorization?.split(' ')[1] ||
-      event.queryStringParameters?.userId
+    const userId = event.queryStringParameters?.userId
 
     if (!userId) {
       return {
@@ -21,24 +19,30 @@ export const handler = async (event, context) => {
       }
     }
 
-    const user = await prisma.user.findUnique({
+    const userWithPrefs = await prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        theme: true,
+      include: {
         extensionAuth: {
           include: {
-            connection: true
+            connection: {
+              where: { isActive: true }
+            }
           }
         }
       }
     })
 
+    // Extract active connections from extension auth records
+    const activeConnections = userWithPrefs?.extensionAuth
+      .map(auth => auth.connection)
+      .filter(conn => conn !== null) || []
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        theme: user?.theme || 'dark',
-        connections: user?.extensionAuth.map(auth => auth.connection) || []
+        theme: userWithPrefs?.theme || 'dark',
+        connections: activeConnections
       })
     }
   } catch (error) {

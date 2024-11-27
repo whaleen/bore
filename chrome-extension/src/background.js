@@ -7,6 +7,6 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Listen for proxy errors
-chrome.proxy.onProxyError.addListener((details) => {
-  console.error('Proxy error:', details);
-});
+// chrome.proxy.onProxyError.addListener((details) => {
+//   console.error('Proxy error:', details);
+// });

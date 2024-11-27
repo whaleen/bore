@@ -107,8 +107,8 @@ function ProxySubmissionForm() {
       <h1 className='text-2xl font-bold mb-6'>Submit Node to Directory</h1>
 
       {error && (
-        <div className='bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg mb-6'>
-          {error}
+        <div className='alert alert-error mb-6'>
+          <span>{error}</span>
         </div>
       )}
 
@@ -117,27 +117,31 @@ function ProxySubmissionForm() {
         className='space-y-6'
       >
         {/* Node Name */}
-        <div>
-          <label className='block text-sm font-medium mb-1'>Node Name</label>
+        <div className='form-control'>
+          <label className='label'>
+            <span className='label-text'>Node Name</span>
+          </label>
           <input
             type='text'
             name='name'
             value={formData.name}
             onChange={handleChange}
-            className='w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none'
             placeholder='e.g., US East Node 1'
+            className='input input-bordered'
             required
           />
         </div>
 
         {/* Country Select */}
-        <div>
-          <label className='block text-sm font-medium mb-1'>Country</label>
+        <div className='form-control'>
+          <label className='label'>
+            <span className='label-text'>Country</span>
+          </label>
           <select
             name='country'
             value={formData.country}
             onChange={handleChange}
-            className='w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none'
+            className='select select-bordered'
             required
           >
             <option value=''>Select a country</option>
@@ -152,42 +156,48 @@ function ProxySubmissionForm() {
           </select>
         </div>
 
-        {/* IP & Protocol & Port */}
+        {/* IP, Protocol, Port */}
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-          <div>
-            <label className='block text-sm font-medium mb-1'>IP Address</label>
+          <div className='form-control'>
+            <label className='label'>
+              <span className='label-text'>IP Address</span>
+            </label>
             <input
               type='text'
               name='ipAddress'
               value={formData.ipAddress}
               onChange={handleChange}
-              className='w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none'
               placeholder='192.168.1.1'
+              className='input input-bordered'
               required
             />
           </div>
-          <div>
-            <label className='block text-sm font-medium mb-1'>Protocol</label>
+          <div className='form-control'>
+            <label className='label'>
+              <span className='label-text'>Protocol</span>
+            </label>
             <select
               name='protocol'
               value={formData.protocol}
               onChange={handleChange}
-              className='w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none'
+              className='select select-bordered'
             >
               <option value='HTTP'>HTTP</option>
               <option value='HTTPS'>HTTPS</option>
               <option value='SOCKS5'>SOCKS5</option>
             </select>
           </div>
-          <div>
-            <label className='block text-sm font-medium mb-1'>Port</label>
+          <div className='form-control'>
+            <label className='label'>
+              <span className='label-text'>Port</span>
+            </label>
             <input
               type='number'
               name='port'
               value={formData.port}
               onChange={handleChange}
-              className='w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none'
               placeholder='8080'
+              className='input input-bordered'
               required
             />
           </div>
@@ -195,69 +205,69 @@ function ProxySubmissionForm() {
 
         {/* Optional Fields */}
         <div className='grid grid-cols-2 gap-4'>
-          <div>
-            <label className='block text-sm font-medium mb-1'>
-              Username (Optional)
+          <div className='form-control'>
+            <label className='label'>
+              <span className='label-text'>Username (Optional)</span>
             </label>
             <input
               type='text'
               name='username'
               value={formData.username}
               onChange={handleChange}
-              className='w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none'
               placeholder='username'
+              className='input input-bordered'
             />
           </div>
-          <div>
-            <label className='block text-sm font-medium mb-1'>
-              Password (Optional)
+          <div className='form-control'>
+            <label className='label'>
+              <span className='label-text'>Password (Optional)</span>
             </label>
             <input
               type='password'
               name='password'
               value={formData.password}
               onChange={handleChange}
-              className='w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none'
               placeholder='password'
+              className='input input-bordered'
             />
           </div>
         </div>
 
         {/* UDP Support */}
-        <div className='flex items-center space-x-2'>
-          <input
-            type='checkbox'
-            name='supportsUDP'
-            checked={formData.supportsUDP}
-            onChange={handleChange}
-            className='w-4 h-4 bg-gray-800 rounded focus:ring-2 focus:ring-blue-500'
-          />
-          <label className='text-sm font-medium'>Supports UDP</label>
+        <div className='form-control'>
+          <label className='cursor-pointer flex items-center space-x-2'>
+            <input
+              type='checkbox'
+              name='supportsUDP'
+              checked={formData.supportsUDP}
+              onChange={handleChange}
+              className='checkbox'
+            />
+            <span className='label-text'>Supports UDP</span>
+          </label>
         </div>
 
         {/* Notes */}
-        <div>
-          <label className='block text-sm font-medium mb-1'>
-            Notes (Optional)
+        <div className='form-control'>
+          <label className='label'>
+            <span className='label-text'>Notes (Optional)</span>
           </label>
           <textarea
             name='notes'
             value={formData.notes}
             onChange={handleChange}
-            className='w-full px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none'
             placeholder='Additional information about the node'
+            className='textarea textarea-bordered'
             rows={4}
-          />
+          ></textarea>
         </div>
 
         {/* Submit Button */}
         <button
           type='submit'
           disabled={loading}
-          className={`w-full px-4 py-2 rounded-lg ${
-            loading
-              ? 'bg-gray-500 cursor-not-allowed'
-              : 'bg-green-500 hover:bg-green-600'
+          className={`btn btn-block ${
+            loading ? 'btn-disabled' : 'btn-success'
           }`}
         >
           {loading ? 'Submitting...' : 'Submit Node'}

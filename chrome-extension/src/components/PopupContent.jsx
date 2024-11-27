@@ -1,3 +1,4 @@
+// chrome-extension/src/components/PopupContent.jsx
 import React, { useState, useEffect } from 'react'
 
 const STORAGE_KEY = 'bore_selected_node'

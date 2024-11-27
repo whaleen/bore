@@ -2,7 +2,7 @@
 import prisma from './prisma'
 import crypto from 'crypto'
 
-export const handler = async function (event, context) {
+export const handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -44,12 +44,22 @@ export const handler = async function (event, context) {
     // Generate API key
     const apiKey = crypto.randomBytes(32).toString('hex')
 
-    // Create auth record
-    await prisma.extensionAuth.create({
+    // Create auth record with connected extension
+    const extensionAuth = await prisma.extensionAuth.create({
       data: {
         apiKey,
         userId: linkCode.userId,
+        connection: {
+          create: {
+            userId: linkCode.userId,
+            deviceName: 'Chrome Extension',
+            isActive: true
+          }
+        }
       },
+      include: {
+        connection: true
+      }
     })
 
     // Mark code as used
@@ -63,7 +73,7 @@ export const handler = async function (event, context) {
       headers,
       body: JSON.stringify({
         apiKey,
-        userId: linkCode.userId // Send back the Solana public key
+        userId: linkCode.userId
       }),
     }
   } catch (error) {

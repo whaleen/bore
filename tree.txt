@@ -40,11 +40,14 @@
 │       ├── add-node.js
 │       ├── edit-node.js
 │       ├── generate-link-code.js
+│       ├── get-user-preferences.js
+│       ├── manage-extension-connection.js
 │       ├── nodes.js
 │       ├── prisma.js
 │       ├── remove-saved-node.js
 │       ├── save-node.js
 │       ├── set-primary-node.js
+│       ├── update-user-preferences.js
 │       ├── user-nodes.js
 │       └── verify-link-code.js
 ├── netlify.toml
@@ -60,6 +63,8 @@
 │   │   ├── 20241127102330_update_user_saved_nodes
 │   │   │   └── migration.sql
 │   │   ├── 20241127115251_update_add_chrome_extension_linked
+│   │   │   └── migration.sql
+│   │   ├── 20241127152934_add_theme_and_connections
 │   │   │   └── migration.sql
 │   │   └── migration_lock.toml
 │   ├── schema.prisma
@@ -88,4 +93,4 @@
 ├── tree.txt
 └── vite.config.js
 
-22 directories, 67 files
+23 directories, 71 files

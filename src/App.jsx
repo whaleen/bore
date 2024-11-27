@@ -16,29 +16,45 @@ function App() {
     <ThemeProvider>
       <Router>
         <div className='min-h-screen bg-base-100 text-base-content'>
-          <nav className='bg-base-200 p-4'>
-            <div className='container mx-auto flex justify-between items-center'>
-              <div className='flex gap-4'>
+          <nav className='navbar bg-base-200 p-4'>
+            <div className='container mx-auto'>
+              {/* Left Section: Logo and Links */}
+              <div className='flex-1 flex items-center gap-4'>
                 <Link
                   to='/'
-                  className='hover:text-primary'
+                  className='flex items-center gap-2 hover:text-primary'
                 >
-                  Nodes
+                  <img
+                    src='bore.svg'
+                    alt='Bore Logo'
+                    className='w-8 h-8'
+                  />
+                  {/* <span className='text-xl font-bold'>Bore</span> */}
                 </Link>
-                <Link
-                  to='/account'
-                  className='hover:text-primary'
-                >
-                  Account
-                </Link>
-                <Link
-                  to='/submit'
-                  className='hover:text-primary'
-                >
-                  Submit Node
-                </Link>
+                <div className='hidden lg:flex gap-4'>
+                  <Link
+                    to='/'
+                    className='hover:text-primary'
+                  >
+                    Nodes
+                  </Link>
+                  <Link
+                    to='/account'
+                    className='hover:text-primary'
+                  >
+                    Account
+                  </Link>
+                  <Link
+                    to='/submit'
+                    className='hover:text-primary'
+                  >
+                    Submit Node
+                  </Link>
+                </div>
               </div>
-              <div className='flex items-center gap-4'>
+
+              {/* Right Section: Theme Toggle and Wallet Connection */}
+              <div className='flex-none flex items-center gap-4'>
                 <ThemeToggle />
                 <WalletConnection />
               </div>

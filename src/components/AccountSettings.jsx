@@ -14,15 +14,32 @@ function AccountSettings() {
   const { theme, toggleTheme } = useTheme()
   const publicKeyBase58 = publicKey ? publicKey.toBase58() : null
 
-  useEffect(() => {
-    if (publicKeyBase58) {
-      Promise.all([fetchSavedNodes(), fetchConnections()]).finally(() =>
-        setLoading(false)
+  const fetchSavedNodes = async () => {
+    if (!publicKeyBase58) {
+      setLoading(false)
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response = await fetch(
+        `/.netlify/functions/user-nodes?userId=${publicKeyBase58}`
       )
-    } else {
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch saved nodes')
+      }
+
+      setSavedNodes(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Error:', error)
+      setError(error.message)
+      setSavedNodes([])
+    } finally {
       setLoading(false)
     }
-  }, [publicKeyBase58])
+  }
 
   const fetchConnections = async () => {
     try {
@@ -36,6 +53,43 @@ function AccountSettings() {
     } catch (error) {
       console.error('Error fetching connections:', error)
       setError('Failed to load extension connections')
+    }
+  }
+
+  const handleGenerateLinkCode = async () => {
+    if (!publicKeyBase58) return
+
+    try {
+      setIsGeneratingCode(true)
+      setError(null)
+
+      const response = await fetch('/.netlify/functions/generate-link-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: publicKeyBase58,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate link code')
+      }
+
+      setLinkCode(data.code)
+
+      // Clear code after 15 minutes
+      setTimeout(() => {
+        setLinkCode(null)
+      }, 15 * 60 * 1000)
+    } catch (error) {
+      console.error('Error generating link code:', error)
+      setError(error.message)
+    } finally {
+      setIsGeneratingCode(false)
     }
   }
 
@@ -63,8 +117,67 @@ function AccountSettings() {
     }
   }
 
-  // ... (keeping all existing functions: fetchSavedNodes, handleGenerateLinkCode,
-  //      handleSetPrimary, handleRemoveNode)
+  const handleSetPrimary = async (nodeId) => {
+    try {
+      const response = await fetch('/.netlify/functions/set-primary-node', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: publicKeyBase58,
+          nodeId,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to set primary node')
+      }
+
+      await fetchSavedNodes()
+    } catch (error) {
+      console.error('Error setting primary node:', error)
+      setError(error.message)
+    }
+  }
+
+  const handleRemoveNode = async (nodeId) => {
+    try {
+      const response = await fetch('/.netlify/functions/remove-saved-node', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: publicKeyBase58,
+          nodeId,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to remove node')
+      }
+
+      setSavedNodes(savedNodes.filter((saved) => saved.nodeId !== nodeId))
+    } catch (error) {
+      console.error('Error removing node:', error)
+      setError(error.message)
+    }
+  }
+
+  useEffect(() => {
+    if (publicKeyBase58) {
+      Promise.all([fetchSavedNodes(), fetchConnections()]).finally(() =>
+        setLoading(false)
+      )
+    } else {
+      setLoading(false)
+    }
+  }, [publicKeyBase58])
 
   if (!publicKeyBase58) {
     return (
@@ -100,7 +213,7 @@ function AccountSettings() {
         <h2 className='text-xl font-semibold mb-4'>Theme Preferences</h2>
         <div className='flex gap-4'>
           <button
-            onClick={() => toggleTheme()}
+            onClick={toggleTheme}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg 
               ${theme === 'light' ? 'bg-primary text-white' : 'bg-base-300'}`}
           >
@@ -108,7 +221,7 @@ function AccountSettings() {
             Light
           </button>
           <button
-            onClick={() => toggleTheme()}
+            onClick={toggleTheme}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg
               ${theme === 'dark' ? 'bg-primary text-white' : 'bg-base-300'}`}
           >
@@ -122,38 +235,42 @@ function AccountSettings() {
       <div className='mb-8 p-6 bg-base-200 rounded-lg'>
         <h2 className='text-xl font-semibold mb-4'>Chrome Extension</h2>
 
-        {connections.length > 0 ? (
+        {connections && connections.length > 0 ? (
           <div className='space-y-4'>
             <h3 className='text-lg font-medium mb-2'>Connected Devices</h3>
-            {connections.map((connection) => (
-              <div
-                key={connection.id}
-                className='flex items-center justify-between p-4 bg-base-300 rounded-lg'
-              >
-                <div className='flex items-center gap-3'>
-                  <Laptop className='w-5 h-5' />
-                  <div>
-                    <p className='font-medium'>
-                      {connection.deviceName || 'Chrome Extension'}
-                    </p>
-                    <p className='text-sm text-gray-400'>
-                      Connected{' '}
-                      {new Date(connection.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleRevokeConnection(connection.id)}
-                  className='btn btn-error btn-sm'
+            {connections
+              .filter((connection) => connection !== null)
+              .map((connection) => (
+                <div
+                  key={connection.id}
+                  className='flex items-center justify-between p-4 bg-base-300 rounded-lg'
                 >
-                  <X
-                    size={16}
-                    className='mr-1'
-                  />
-                  Revoke Access
-                </button>
-              </div>
-            ))}
+                  <div className='flex items-center gap-3'>
+                    <Laptop className='w-5 h-5' />
+                    <div>
+                      <p className='font-medium'>
+                        {connection?.deviceName || 'Chrome Extension'}
+                      </p>
+                      <p className='text-sm text-gray-400'>
+                        Connected{' '}
+                        {connection?.createdAt
+                          ? new Date(connection.createdAt).toLocaleDateString()
+                          : 'Unknown date'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleRevokeConnection(connection.id)}
+                    className='btn btn-error btn-sm'
+                  >
+                    <X
+                      size={16}
+                      className='mr-1'
+                    />
+                    Revoke Access
+                  </button>
+                </div>
+              ))}
           </div>
         ) : linkCode ? (
           <div className='text-center'>

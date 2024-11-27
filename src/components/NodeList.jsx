@@ -104,38 +104,39 @@ function NodeList() {
         {filteredNodes.map((node) => (
           <div
             key={node.id}
-            className={`border ${
-              node.isActive ? 'border-green-500' : 'border-yellow-500'
-            } rounded-lg p-4`}
+            className={`card shadow-md ${
+              node.isActive
+                ? 'border border-green-500'
+                : 'border border-yellow-500'
+            }`}
           >
-            <h3 className='text-lg font-semibold'>{node.name}</h3>
-            <div className='mt-2'>
-              <p>
-                {node.country} ({node.countryCode})
-              </p>
-              <p className='text-gray-400'>{node.ipAddress}</p>
-              <p className='text-gray-400'>
-                Protocol: {node.protocol || 'N/A'}
-              </p>
-              <p className='text-gray-400'>Region: {node.region}</p>
-              {node.supportsUDP && (
-                <p className='text-green-400'>UDP Supported</p>
+            <div className='card-body'>
+              <h3 className='card-title'>{node.name}</h3>
+              <div className='mt-2'>
+                <p>
+                  {node.country} ({node.countryCode})
+                </p>
+                <p className='text-gray-400'>{node.ipAddress}</p>
+                <p className='text-gray-400'>
+                  Protocol: {node.protocol || 'N/A'}
+                </p>
+                <p className='text-gray-400'>Region: {node.region}</p>
+                {node.supportsUDP && (
+                  <p className='text-green-400'>UDP Supported</p>
+                )}
+              </div>
+              {publicKeyBase58 && (
+                <button
+                  onClick={() => handleSaveNode(node)}
+                  className={`btn btn-block mt-4 ${
+                    node.isActive ? 'btn-success' : 'btn-disabled'
+                  }`}
+                  disabled={!node.isActive}
+                >
+                  {node.isActive ? 'Save Node' : 'Unavailable'}
+                </button>
               )}
             </div>
-            {publicKeyBase58 && (
-              <button
-                onClick={() => handleSaveNode(node)}
-                className={`mt-4 w-full px-4 py-2 rounded
-                  ${
-                    node.isActive
-                      ? 'bg-green-500 hover:bg-green-600 text-white'
-                      : 'bg-gray-500 text-gray-300 cursor-not-allowed'
-                  }`}
-                disabled={!node.isActive}
-              >
-                {node.isActive ? 'Save Node' : 'Unavailable'}
-              </button>
-            )}
           </div>
         ))}
       </div>

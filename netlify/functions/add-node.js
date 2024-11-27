@@ -1,4 +1,3 @@
-// netlify/functions/add-node.js
 import prisma from './prisma'
 import ct from 'countries-and-timezones'
 
@@ -9,7 +8,7 @@ const COUNTRY_REGIONS = {
   // ... (same mapping as in location.js)
 }
 
-exports.handler = async function (event, context) {
+export const handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',

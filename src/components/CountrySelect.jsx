@@ -43,7 +43,7 @@ function CountrySelect({ value, onChange, countries }) {
       <button
         type='button'
         onClick={() => setIsOpen(!isOpen)}
-        className='w-full md:w-64 px-4 py-2 bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none flex items-center justify-between'
+        className='btn w-full md:w-64 btn-outline flex justify-between items-center'
       >
         <div className='flex items-center'>
           {selectedCountry ? (
@@ -61,26 +61,27 @@ function CountrySelect({ value, onChange, countries }) {
       </button>
 
       {isOpen && (
-        <div className='absolute z-50 mt-1 w-full bg-gray-800 rounded-lg shadow-lg max-h-60 overflow-y-auto'>
-          <div className='p-1'>
+        <ul className='menu menu-compact absolute z-50 mt-1 w-full bg-base-200 rounded-lg shadow-lg max-h-60 overflow-y-auto'>
+          <li>
             <button
-              className='w-full px-4 py-2 text-left hover:bg-gray-700 rounded flex items-center'
+              className='w-full flex items-center'
               onClick={() => handleSelect({ code: '', name: 'All Countries' })}
             >
               All Countries
             </button>
-            {countries.map((country) => (
+          </li>
+          {countries.map((country) => (
+            <li key={country.code}>
               <button
-                key={country.code}
-                className='w-full px-4 py-2 text-left hover:bg-gray-700 rounded flex items-center'
+                className='w-full flex items-center'
                 onClick={() => handleSelect(country)}
               >
                 <span className='mr-2'>{getFlag(country.code)}</span>
                 <span>{country.name}</span>
               </button>
-            ))}
-          </div>
-        </div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )

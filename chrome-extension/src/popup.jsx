@@ -1,6 +1,8 @@
-// chrome-extension/src/components/NodeList.jsx
+// chrome-extension/src/popup.jsx
 import React, { useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
+import { ThemeProvider } from './contexts/ThemeContext'
+import ThemeToggle from './components/ThemeToggle'
 import NodeList from './components/NodeList'
 import PrimaryNode from './components/PrimaryNode'
 import ToggleSwitch from './components/ToggleSwitch'
@@ -9,6 +11,7 @@ import {
   getStoredUserId,
   setStoredCredentials,
 } from './utils/storage'
+import './styles/tailwind.css'
 import './styles/popup.css'
 
 const API_URL = 'https://bore.nil.computer'
@@ -23,9 +26,10 @@ function App() {
   const [isEnabled, setIsEnabled] = useState(false)
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [theme, setTheme] = useState('dark')
 
   useEffect(() => {
-    const init = async () => {
+    const fetchLatestData = async () => {
       try {
         const [storedApiKey, storedUserId] = await Promise.all([
           getStoredApiKey(),
@@ -37,6 +41,7 @@ function App() {
           setUserId(storedUserId)
           setIsLinked(true)
           await fetchUserNodes(storedUserId, storedApiKey)
+          await fetchUserPreferences(storedUserId)
         }
       } catch (err) {
         console.error('Init error:', err)
@@ -45,7 +50,7 @@ function App() {
         setIsLoading(false)
       }
     }
-    init()
+    fetchLatestData()
   }, [])
 
   const fetchUserNodes = async (currentUserId, currentApiKey) => {
@@ -75,6 +80,24 @@ function App() {
     } catch (err) {
       console.error('Error fetching nodes:', err)
       setError('Failed to load your nodes')
+    }
+  }
+
+  const fetchUserPreferences = async (userId) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/.netlify/functions/get-user-preferences?userId=${userId}`
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user preferences')
+      }
+
+      const data = await response.json()
+      setTheme(data.theme)
+    } catch (err) {
+      console.error('Error fetching user preferences:', err)
+      setError('Failed to load user preferences')
     }
   }
 
@@ -152,80 +175,102 @@ function App() {
   }
 
   if (isLoading) {
-    return <div className='loading'>Loading...</div>
+    return (
+      <div className='flex justify-center items-center'>
+        <span className='loading loading-spinner text-primary'></span>
+      </div>
+    )
   }
 
   return (
-    <div className='bore-proxy-extension'>
-      <h1>Bore Proxy</h1>
+    <ThemeProvider>
+      <div className='bore-proxy-extension min-h-screen bg-base-100 text-base-content p-6 rounded-xl shadow-lg'>
+        <h1 className='text-3xl font-bold mb-6 text-primary'>Bore Proxy</h1>
+        <div className='mb-6'>
+          <ThemeToggle />
+        </div>
+        {error && (
+          <div className='alert alert-error shadow-lg rounded-lg p-4 mb-6'>
+            <span>{error}</span>
+          </div>
+        )}
 
-      {error && <div className='error-message'>{error}</div>}
+        {isLinked ? (
+          <div>
+            <div className='mb-6'>
+              <ToggleSwitch
+                enabled={isEnabled}
+                onToggle={handleToggleProxy}
+              />
+            </div>
+            <div className='mb-6'>
+              <PrimaryNode node={primaryNode} />
+            </div>
+            <div className='mb-6'>
+              <NodeList
+                nodes={nodes}
+                onSetPrimary={async (node) => {
+                  try {
+                    const response = await fetch(
+                      `${API_URL}/.netlify/functions/set-primary-node`,
+                      {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${apiKey}`,
+                        },
+                        body: JSON.stringify({
+                          userId,
+                          nodeId: node.id,
+                        }),
+                      }
+                    )
 
-      {isLinked ? (
-        <div>
-          <ToggleSwitch
-            enabled={isEnabled}
-            onToggle={handleToggleProxy}
-          />
-          <PrimaryNode node={primaryNode} />
-          <NodeList
-            nodes={nodes}
-            onSetPrimary={async (node) => {
-              try {
-                const response = await fetch(
-                  `${API_URL}/.netlify/functions/set-primary-node`,
-                  {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${apiKey}`,
-                    },
-                    body: JSON.stringify({
-                      userId,
-                      nodeId: node.id,
-                    }),
+                    if (!response.ok) {
+                      throw new Error('Failed to set primary node')
+                    }
+
+                    await fetchUserNodes(userId, apiKey)
+                  } catch (err) {
+                    console.error('Error setting primary node:', err)
+                    setError('Failed to set primary node')
                   }
-                )
-
-                if (!response.ok) {
-                  throw new Error('Failed to set primary node')
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className='linking-view p-6 rounded-lg shadow-lg bg-base-200'>
+            <h2 className='text-xl font-semibold mb-4 text-primary'>
+              Link Your Account
+            </h2>
+            <p className='text-base mb-4'>
+              Enter the 6-digit code from your account settings
+            </p>
+            <input
+              type='text'
+              className='input input-bordered input-primary w-full mb-4'
+              placeholder='Enter code'
+              value={linkCode}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9]/g, '')
+                if (value.length <= 6) {
+                  setLinkCode(value)
                 }
-
-                await fetchUserNodes(userId, apiKey)
-              } catch (err) {
-                console.error('Error setting primary node:', err)
-                setError('Failed to set primary node')
-              }
-            }}
-          />
-        </div>
-      ) : (
-        <div className='linking-view'>
-          <h2>Link Your Account</h2>
-          <p>Enter the 6-digit code from your account settings</p>
-          <input
-            type='text'
-            className='linking-input'
-            placeholder='Enter code'
-            value={linkCode}
-            onChange={(e) => {
-              const value = e.target.value.replace(/[^0-9]/g, '')
-              if (value.length <= 6) {
-                setLinkCode(value)
-              }
-            }}
-            maxLength={6}
-          />
-          <button
-            className='link-button'
-            onClick={handleVerifyCode}
-            disabled={linkCode.length !== 6}
-          >
-            Link Account
-          </button>
-        </div>
-      )}
-    </div>
+              }}
+              maxLength={6}
+            />
+            <button
+              className='btn btn-primary w-full'
+              onClick={handleVerifyCode}
+              disabled={linkCode.length !== 6}
+            >
+              Link Account
+            </button>
+          </div>
+        )}
+      </div>
+    </ThemeProvider>
   )
 }
 
