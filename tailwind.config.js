@@ -5,19 +5,59 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    themes: ["light", "dark", "cupcake"],
     extend: {},
   },
-  plugins: [],
-  // daisyUI config (optional - here are the default values)
+  plugins: [require("daisyui")],
   daisyui: {
-    themes: false, // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
-    darkTheme: "dark", // name of one of the included themes for dark mode
-    base: true, // applies background color and foreground color for root element by default
-    styled: true, // include daisyUI colors and design decisions for all components
-    utils: true, // adds responsive and modifier utility classes
-    prefix: "", // prefix for daisyUI classnames (components, modifiers and responsive class names. Not colors)
-    logs: true, // Shows info about daisyUI version and used config in the console when building your CSS
-    themeRoot: ":root", // The element that receives theme color CSS variables
+    themes: [
+      {
+        light: {
+          "primary": "#4C94F8",          // Primary blue
+          "secondary": "#38BDF8",        // Secondary blue
+          "accent": "#42B883",           // Accent green
+          "neutral": "#2A3441",          // Dark gray
+          "base-100": "#FFFFFF",         // Background white
+          "base-200": "#F8FAFC",         // Slightly darker background
+          "base-300": "#F1F5F9",         // Even darker background
+          "info": "#0EA5E9",             // Info blue
+          "success": "#22C55E",          // Success green
+          "warning": "#F59E0B",          // Warning yellow
+          "error": "#EF4444",            // Error red
+
+          ".btn": {
+            "border-radius": "0.5rem",    // Rounded buttons
+          },
+
+          ".card": {
+            "background": "#FFFFFF",      // Card background
+            "box-shadow": "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+            "border-radius": "0.75rem",   // Rounded cards
+          },
+        },
+        dark: {
+          "primary": "#4C94F8",          // Primary blue
+          "secondary": "#38BDF8",        // Secondary blue
+          "accent": "#42B883",           // Accent green
+          "neutral": "#1E1E1E",          // Dark background
+          "base-100": "#0F0F0F",         // Main background
+          "base-200": "#1A1A1A",         // Slightly lighter background
+          "base-300": "#262626",         // Even lighter background
+          "info": "#0EA5E9",             // Info blue
+          "success": "#22C55E",          // Success green
+          "warning": "#F59E0B",          // Warning yellow
+          "error": "#EF4444",            // Error red
+
+          ".btn": {
+            "border-radius": "0.5rem",    // Rounded buttons
+          },
+
+          ".card": {
+            "background": "#1A1A1A",      // Card background
+            "box-shadow": "0 4px 6px -1px rgb(0 0 0 / 0.3)",
+            "border-radius": "0.75rem",   // Rounded cards
+          },
+        },
+      },
+    ],
   },
 }

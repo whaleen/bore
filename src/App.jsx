@@ -1,55 +1,74 @@
-import { useState } from 'react'
+import { useContext } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import NodeList from './components/NodeList'
+import AccountSettings from './components/AccountSettings'
+import WalletConnection from './components/WalletConnection'
+import ProxySubmissionForm from './components/ProxySubmissionForm'
+import { WalletContext } from './components/WalletContext'
+import ThemeToggle from './components/ThemeToggle'
+import { ThemeProvider } from './components/ThemeContext'
 
 function App() {
-  const [connectedNode, setConnectedNode] = useState(null)
-
-  const handleConnect = async (node) => {
-    try {
-      const userId = 'test-solana-pubkey' // Will come from wallet later
-      const response = await fetch('/.netlify/functions/select-node', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          node,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to save node selection')
-      }
-
-      setConnectedNode(node)
-    } catch (error) {
-      console.error('Error saving node selection:', error)
-    }
-  }
-
-  const handleDisconnect = () => {
-    setConnectedNode(null)
-  }
+  const { publicKey } = useContext(WalletContext)
+  const publicKeyBase58 = publicKey ? publicKey.toBase58() : null
 
   return (
-    <div className='min-h-screen bg-gray-950 text-white'>
-      <div className='container mx-auto p-4'>
-        {connectedNode && (
-          <div className='bg-green-600 p-4 rounded-lg mb-6 flex justify-between items-center'>
-            <span>Connected to {connectedNode.name}</span>
-            <button
-              onClick={handleDisconnect}
-              className='bg-gray-800 px-4 py-2 rounded hover:bg-gray-700'
-            >
-              Disconnect
-            </button>
+    <ThemeProvider>
+      <Router>
+        <div className='min-h-screen bg-base-100 text-base-content'>
+          <nav className='bg-base-200 p-4'>
+            <div className='container mx-auto flex justify-between items-center'>
+              <div className='flex gap-4'>
+                <Link
+                  to='/'
+                  className='hover:text-primary'
+                >
+                  Nodes
+                </Link>
+                <Link
+                  to='/account'
+                  className='hover:text-primary'
+                >
+                  Account
+                </Link>
+                <Link
+                  to='/submit'
+                  className='hover:text-primary'
+                >
+                  Submit Node
+                </Link>
+              </div>
+              <div className='flex items-center gap-4'>
+                <ThemeToggle />
+                <WalletConnection />
+              </div>
+            </div>
+          </nav>
+
+          <div className='container mx-auto p-4'>
+            <Routes>
+              <Route
+                path='/'
+                element={
+                  <>
+                    <h1 className='text-2xl font-bold mb-6'>Available Nodes</h1>
+                    <NodeList />
+                  </>
+                }
+              />
+              <Route
+                path='/account'
+                element={<AccountSettings />}
+              />
+              <Route
+                path='/submit'
+                element={<ProxySubmissionForm />}
+              />
+            </Routes>
           </div>
-        )}
-        <h1 className='text-2xl font-bold mb-6'>Available Nodes</h1>
-        <NodeList onConnect={handleConnect} />
-      </div>
-    </div>
+        </div>
+      </Router>
+    </ThemeProvider>
   )
 }
 

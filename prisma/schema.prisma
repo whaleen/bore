@@ -1,3 +1,4 @@
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,23 +8,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String          @id // Solana public key
+  name          String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  linkCodes     LinkCode[]
+  extensionAuth ExtensionAuth[]
+
+  // Relation to saved nodes
+  savedNodes UserSavedNode[]
+}
+
 model Node {
   id          String   @id @default(uuid())
   name        String
   country     String
   countryCode String
   ipAddress   String
+  protocol    String? // HTTP, HTTPS, SOCKS5
+  port        Int
+  username    String? // Optional
+  password    String? // Optional
+  region      String
+  supportsUDP Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  notes       String? // Optional
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relation to users who selected this node
-  selectedBy UserSelectedNode?
+  // Relation to users who saved this node
+  savedBy UserSavedNode[]
 }
 
-model UserSelectedNode {
-  userId    String   @id // Will be Solana public key
-  node      Node     @relation(fields: [nodeId], references: [id])
-  nodeId    String   @unique // One node can only be selected by one user at a time
+model UserSavedNode {
+  id        String   @id @default(uuid())
+  userId    String
+  nodeId    String
+  isPrimary Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  node Node @relation(fields: [nodeId], references: [id])
+
+  @@unique([userId, nodeId])
+  @@index([userId, isPrimary])
+}
+
+model LinkCode {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model ExtensionAuth {
+  id        String   @id @default(uuid())
+  apiKey    String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  lastUsed  DateTime @updatedAt
 }

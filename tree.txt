@@ -1,29 +1,89 @@
 .
 ├── README.md
+├── chrome-extension
+│   ├── README.md
+│   ├── dist
+│   │   ├── background.js
+│   │   ├── icons
+│   │   │   ├── icon128.png
+│   │   │   ├── icon16.png
+│   │   │   └── icon48.png
+│   │   ├── manifest.json
+│   │   ├── popup.html
+│   │   └── popup.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   │   ├── icons
+│   │   │   ├── icon128.png
+│   │   │   ├── icon16.png
+│   │   │   └── icon48.png
+│   │   ├── manifest.json
+│   │   └── popup.html
+│   ├── src
+│   │   ├── background.js
+│   │   ├── components
+│   │   │   ├── NodeList.jsx
+│   │   │   ├── PrimaryNode.jsx
+│   │   │   └── ToggleSwitch.jsx
+│   │   ├── popup.jsx
+│   │   ├── styles
+│   │   │   └── popup.css
+│   │   └── utils
+│   │       └── storage.js
+│   └── webpack.config.js
 ├── eslint.config.js
 ├── index.html
 ├── netlify
 │   └── functions
-│       └── nodes.js
+│       ├── add-node.js
+│       ├── edit-node.js
+│       ├── generate-link-code.js
+│       ├── nodes.js
+│       ├── remove-saved-node.js
+│       ├── save-node.js
+│       ├── set-primary-node.js
+│       ├── user-nodes.js
+│       └── verify-link-code.js
 ├── netlify.toml
 ├── package-lock.json
 ├── package.json
 ├── postcss.config.js
 ├── prisma
-│   └── schema.prisma
+│   ├── migrations
+│   │   ├── 20241127090901_add_proxy_fields
+│   │   │   └── migration.sql
+│   │   ├── 20241127094458_add_is_active_field
+│   │   │   └── migration.sql
+│   │   ├── 20241127102330_update_user_saved_nodes
+│   │   │   └── migration.sql
+│   │   ├── 20241127115251_update_add_chrome_extension_linked
+│   │   │   └── migration.sql
+│   │   └── migration_lock.toml
+│   ├── schema.prisma
+│   └── seed.js
 ├── public
+│   ├── bore.svg
 │   └── vite.svg
 ├── src
 │   ├── App.css
 │   ├── App.jsx
-│   ├── assets
-│   │   └── react.svg
 │   ├── components
-│   │   └── NodeList.js
+│   │   ├── AccountSettings.jsx
+│   │   ├── CountrySelect.jsx
+│   │   ├── NodeDirectoryNavigation.jsx
+│   │   ├── NodeList.jsx
+│   │   ├── ProxySubmissionForm.jsx
+│   │   ├── ThemeContext.jsx
+│   │   ├── ThemeToggle.jsx
+│   │   ├── WalletConnection.jsx
+│   │   └── WalletContext.jsx
 │   ├── index.css
-│   └── main.jsx
+│   ├── main.jsx
+│   └── utils
+│       └── location.js
 ├── tailwind.config.js
 ├── tree.txt
 └── vite.config.js
 
-8 directories, 19 files
+22 directories, 65 files

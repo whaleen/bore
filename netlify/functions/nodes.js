@@ -1,34 +1,46 @@
-const { faker } = require('@faker-js/faker')
-
-function generateFakeNodes(count) {
-  return Array.from({ length: count }, () => ({
-    id: faker.string.uuid(),
-    name: faker.person.fullName(),
-    country: faker.location.country(),
-    countryCode: faker.location.countryCode(),
-    ipAddress: faker.internet.ip()
-  }))
-}
+// netlify/functions/nodes.js
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 
 exports.handler = async function (event, context) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   }
 
   try {
-    const nodes = generateFakeNodes(60)
+    // Simple fetch of all nodes
+    const nodes = await prisma.node.findMany({
+      select: {
+        id: true,
+        name: true,
+        country: true,
+        countryCode: true,
+        ipAddress: true,
+        protocol: true,
+        port: true,
+        region: true,
+        supportsUDP: true,
+        createdAt: true,
+        updatedAt: true,
+        isActive: true,
+      },
+    })
+
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(nodes)
+      body: JSON.stringify(nodes),
     }
   } catch (error) {
+    console.error('Error:', error)
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to generate nodes' })
+      body: JSON.stringify({ error: 'Failed to fetch nodes', details: error.message }),
     }
+  } finally {
+    await prisma.$disconnect()
   }
 }
