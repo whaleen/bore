@@ -26,7 +26,7 @@ function App() {
   const [isEnabled, setIsEnabled] = useState(false)
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [theme, setTheme] = useState('dark')
+  const [setTheme] = useState('dark')
 
   useEffect(() => {
     const fetchLatestData = async () => {

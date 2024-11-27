@@ -1,7 +1,7 @@
-import { useEffect, useState, useContext } from 'react'
-import { WalletContext } from './WalletContext'
+import { useEffect, useState } from 'react'
 import { useTheme } from './ThemeContext'
 import { Sun, Moon, Laptop, X, RefreshCw } from 'lucide-react'
+import { useWallet } from '@solana/wallet-adapter-react'
 
 function AccountSettings() {
   const [savedNodes, setSavedNodes] = useState([])
@@ -10,7 +10,7 @@ function AccountSettings() {
   const [error, setError] = useState(null)
   const [linkCode, setLinkCode] = useState(null)
   const [isGeneratingCode, setIsGeneratingCode] = useState(false)
-  const { publicKey } = useContext(WalletContext)
+  const { publicKey } = useWallet()
   const { theme, toggleTheme } = useTheme()
   const publicKeyBase58 = publicKey ? publicKey.toBase58() : null
 

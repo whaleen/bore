@@ -1,14 +1,36 @@
-// src/components/WalletContext.
-import { createContext, useState } from 'react'
+// src/components/WalletContext.jsx
+import { useMemo } from 'react'
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from '@solana/wallet-adapter-react'
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
+import {
+  PhantomWalletAdapter,
+  SolflareWalletAdapter,
+} from '@solana/wallet-adapter-wallets'
+import { clusterApiUrl } from '@solana/web3.js'
 
-export const WalletContext = createContext()
+// Import wallet adapter CSS
+import '@solana/wallet-adapter-react-ui/styles.css'
 
-export const WalletProvider = ({ children }) => {
-  const [publicKey, setPublicKey] = useState(null)
+export function WalletContextProvider({ children }) {
+  // You can also provide a custom RPC endpoint
+  const endpoint = useMemo(() => clusterApiUrl('devnet'), [])
+
+  const wallets = useMemo(
+    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+    []
+  )
 
   return (
-    <WalletContext.Provider value={{ publicKey, setPublicKey }}>
-      {children}
-    </WalletContext.Provider>
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider
+        wallets={wallets}
+        autoConnect
+      >
+        <WalletModalProvider>{children}</WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   )
 }

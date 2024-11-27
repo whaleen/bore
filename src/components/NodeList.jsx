@@ -1,14 +1,14 @@
 // src/components/NodeList.jsx
-import { useEffect, useState, useContext } from 'react'
-import { WalletContext } from './WalletContext'
+import { useEffect, useState } from 'react'
 import NodeDirectoryNavigation from './NodeDirectoryNavigation'
+import { useWallet } from '@solana/wallet-adapter-react'
 
 function NodeList() {
   const [nodes, setNodes] = useState([])
   const [filteredNodes, setFilteredNodes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const { publicKey } = useContext(WalletContext)
+  const { publicKey } = useWallet()
   const publicKeyBase58 = publicKey ? publicKey.toBase58() : null
 
   useEffect(() => {

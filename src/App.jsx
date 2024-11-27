@@ -1,16 +1,15 @@
-import { useContext } from 'react'
+// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import NodeList from './components/NodeList'
 import AccountSettings from './components/AccountSettings'
 import WalletConnection from './components/WalletConnection'
 import ProxySubmissionForm from './components/ProxySubmissionForm'
-import { WalletContext } from './components/WalletContext'
 import ThemeToggle from './components/ThemeToggle'
 import { ThemeProvider } from './components/ThemeContext'
+import { useWallet } from '@solana/wallet-adapter-react'
 
 function App() {
-  const { publicKey } = useContext(WalletContext)
-  const publicKeyBase58 = publicKey ? publicKey.toBase58() : null
+  const { publicKey } = useWallet()
 
   return (
     <ThemeProvider>

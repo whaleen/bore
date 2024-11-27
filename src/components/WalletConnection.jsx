@@ -1,89 +1,107 @@
 // src/components/WalletConnection.jsx
-import { useState, useContext } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { useNavigate } from 'react-router-dom'
-import { PublicKey } from '@solana/web3.js'
-import { WalletContext } from './WalletContext'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Wallet, Settings } from 'lucide-react'
+import WalletModal from './WalletModal'
 
 const WalletConnection = () => {
-  const { publicKey, setPublicKey } = useContext(WalletContext)
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const { publicKey, connected, disconnect } = useWallet()
   const navigate = useNavigate()
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
-  const connectWallet = async () => {
-    try {
-      const { solana } = window
-      if (solana && solana.isPhantom) {
-        const response = await solana.connect({ onlyIfTrusted: true })
-        const pubKey = new PublicKey(response.publicKey.toString())
-        setPublicKey(pubKey)
-      } else {
-        alert('Please install the Phantom wallet extension')
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false)
       }
-    } catch (error) {
-      console.error('Error connecting to wallet:', error)
     }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleConnect = () => {
+    setIsWalletModalOpen(true)
   }
 
-  const disconnectWallet = async () => {
-    try {
-      const { solana } = window
-      if (solana) {
-        await solana.disconnect()
-        setPublicKey(null)
-        setIsDropdownOpen(false) // Close dropdown when disconnecting
-      }
-    } catch (error) {
-      console.error('Error disconnecting from wallet:', error)
-    }
-  }
-
-  const truncatePublicKey = (key) => `${key.slice(0, 4)}...${key.slice(-4)}`
-
-  const handleAccountSettings = () => {
+  const handleDisconnect = () => {
+    disconnect()
     setIsDropdownOpen(false)
-    navigate('/account') // Navigate to the /account route
+  }
+
+  const navigateToAccount = () => {
+    navigate('/account')
+    setIsDropdownOpen(false)
+  }
+
+  const truncatePublicKey = (key) => {
+    if (!key) return ''
+    const base58 = key.toBase58()
+    return `${base58.slice(0, 4)}...${base58.slice(-4)}`
   }
 
   return (
-    <div className='relative'>
-      {publicKey ? (
+    <div
+      className='relative'
+      ref={dropdownRef}
+    >
+      {connected ? (
         <>
-          {/* Connected State */}
           <button
-            onClick={() => setIsDropdownOpen((prev) => !prev)}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className='btn btn-sm btn-outline flex items-center gap-2'
           >
-            {truncatePublicKey(publicKey.toBase58())}
+            <Wallet className='w-4 h-4' />
+            {truncatePublicKey(publicKey)}
             <ChevronDown
-              className={`transition-transform ${
+              className={`w-4 h-4 transition-transform ${
                 isDropdownOpen ? 'rotate-180' : ''
               }`}
             />
           </button>
 
           {isDropdownOpen && (
-            <ul className='menu menu-compact dropdown-content bg-base-200 rounded-lg shadow-lg mt-1 absolute right-0 z-50'>
-              <li>
-                <button onClick={disconnectWallet}>Disconnect</button>
-              </li>
-              <li>
-                <button onClick={handleAccountSettings}>
-                  Account Settings
-                </button>
-              </li>
-            </ul>
+            <div className='absolute right-0 mt-2 w-56 rounded-lg bg-base-200 shadow-xl z-50'>
+              <ul className='py-2'>
+                <li>
+                  <button
+                    onClick={navigateToAccount}
+                    className='w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-base-300'
+                  >
+                    <Settings className='w-4 h-4' />
+                    Account Settings
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={handleDisconnect}
+                    className='w-full px-4 py-2 text-left text-error hover:bg-base-300'
+                  >
+                    Disconnect
+                  </button>
+                </li>
+              </ul>
+            </div>
           )}
         </>
       ) : (
-        // Disconnected State
         <button
-          onClick={connectWallet}
-          className='btn btn-sm btn-primary'
+          onClick={handleConnect}
+          className='btn btn-sm btn-primary flex items-center gap-2'
         >
+          <Wallet className='w-4 h-4' />
           Connect Wallet
         </button>
       )}
+
+      <WalletModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+      />
     </div>
   )
 }

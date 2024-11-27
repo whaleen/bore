@@ -13,6 +13,7 @@
 │   │   └── popup.js
 │   ├── package-lock.json
 │   ├── package.json
+│   ├── postcss.config.js
 │   ├── public
 │   │   ├── icons
 │   │   │   ├── icon128.png
@@ -26,12 +27,18 @@
 │   │   │   ├── NodeList.jsx
 │   │   │   ├── PopupContent.jsx
 │   │   │   ├── PrimaryNode.jsx
+│   │   │   ├── ThemeToggle.jsx
 │   │   │   └── ToggleSwitch.jsx
+│   │   ├── contexts
+│   │   │   └── ThemeContext.jsx
 │   │   ├── popup.jsx
 │   │   ├── styles
-│   │   │   └── popup.css
+│   │   │   ├── popup.css
+│   │   │   └── tailwind.css
 │   │   └── utils
 │   │       └── storage.js
+│   ├── tailwind.config.js
+│   ├── tree.txt
 │   └── webpack.config.js
 ├── eslint.config.js
 ├── index.html
@@ -93,4 +100,4 @@
 ├── tree.txt
 └── vite.config.js
 
-23 directories, 71 files
+24 directories, 77 files

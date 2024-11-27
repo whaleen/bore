@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { useContext } from 'react'
-import { WalletContext } from './WalletContext'
 import { getCountriesList } from '../utils/location'
+import { useWallet } from '@solana/wallet-adapter-react'
 
 function ProxySubmissionForm() {
-  const { publicKey } = useContext(WalletContext)
+  const { publicKey } = useWallet()
   const publicKeyBase58 = publicKey ? publicKey.toBase58() : null
   const countries = getCountriesList()
 

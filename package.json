@@ -12,8 +12,10 @@
   "dependencies": {
     "@faker-js/faker": "^9.2.0",
     "@prisma/client": "^5.22.0",
+    "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.95.5",
     "autoprefixer": "^10.4.20",
     "countries-and-timezones": "^3.7.2",
