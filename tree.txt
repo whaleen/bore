@@ -24,6 +24,7 @@
 │   │   ├── background.js
 │   │   ├── components
 │   │   │   ├── NodeList.jsx
+│   │   │   ├── PopupContent.jsx
 │   │   │   ├── PrimaryNode.jsx
 │   │   │   └── ToggleSwitch.jsx
 │   │   ├── popup.jsx
@@ -40,6 +41,7 @@
 │       ├── edit-node.js
 │       ├── generate-link-code.js
 │       ├── nodes.js
+│       ├── prisma.js
 │       ├── remove-saved-node.js
 │       ├── save-node.js
 │       ├── set-primary-node.js
@@ -86,4 +88,4 @@
 ├── tree.txt
 └── vite.config.js
 
-22 directories, 65 files
+22 directories, 67 files

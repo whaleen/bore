@@ -9,15 +9,41 @@ datasource db {
 }
 
 model User {
-  id            String          @id // Solana public key
+  id            String                @id // Solana public key
   name          String
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  theme         String?               @default("dark") // Theme preference
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
   linkCodes     LinkCode[]
   extensionAuth ExtensionAuth[]
+  savedNodes    UserSavedNode[]
+  connections   ExtensionConnection[]
+}
 
-  // Relation to saved nodes
-  savedNodes UserSavedNode[]
+model ExtensionConnection {
+  id         String        @id @default(uuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id])
+  deviceName String? // Browser/device identifier
+  lastSeen   DateTime      @updatedAt
+  createdAt  DateTime      @default(now())
+  isActive   Boolean       @default(true)
+  authId     String        @unique // Make this unique for one-to-one relation
+  auth       ExtensionAuth @relation(fields: [authId], references: [id])
+
+  @@index([userId, isActive])
+}
+
+model ExtensionAuth {
+  id         String               @id @default(uuid())
+  apiKey     String               @unique
+  userId     String
+  user       User                 @relation(fields: [userId], references: [id])
+  createdAt  DateTime             @default(now())
+  lastUsed   DateTime             @updatedAt
+  connection ExtensionConnection?
+
+  @@index([userId])
 }
 
 model Node {
@@ -64,13 +90,4 @@ model LinkCode {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
-}
-
-model ExtensionAuth {
-  id        String   @id @default(uuid())
-  apiKey    String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  lastUsed  DateTime @updatedAt
 }
