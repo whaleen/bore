@@ -1,13 +1,6 @@
 // netlify/functions/add-node.js
-// const { PrismaClient } = require('@prisma/client')
-// const ct = require('countries-and-timezones')
-
-// use imports for the PrismaClient and countries-and-timezones
 import prisma from './prisma'
 import ct from 'countries-and-timezones'
-
-
-const prisma = new PrismaClient()
 
 // Import the region mapping logic or define it here
 const COUNTRY_REGIONS = {

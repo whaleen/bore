@@ -1,6 +1,5 @@
 // netlify/functions/remove-saved-node.js
 import prisma from './prisma'
-const prisma = new PrismaClient()
 
 exports.handler = async function (event, context) {
   const headers = {

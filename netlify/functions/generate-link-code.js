@@ -1,9 +1,6 @@
 // netlify/functions/generate-link-code.js
 import prisma from './prisma'
 
-// Initialize Prisma Client outside the handler
-const prisma = new PrismaClient()
-
 function generateCode() {
   return Math.random().toString().slice(2, 8)
 }

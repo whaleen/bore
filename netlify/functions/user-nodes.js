@@ -1,6 +1,5 @@
 // netlify/functions/user-nodes.js
 import prisma from './prisma'
-const prisma = new PrismaClient()
 
 exports.handler = async function (event, context) {
   const headers = {

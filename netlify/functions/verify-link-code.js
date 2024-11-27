@@ -1,7 +1,6 @@
 // netlify/functions/verify-link-code.js
 import prisma from './prisma'
 import crypto from 'crypto'
-const prisma = new PrismaClient()
 
 exports.handler = async function (event, context) {
   const headers = {
