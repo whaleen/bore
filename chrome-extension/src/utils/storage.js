@@ -1,4 +1,4 @@
-// chreme-extension/src/utils/storage.js
+// chrome-extension/src/utils/storage.js
 export const getStoredApiKey = () => {
   return new Promise((resolve) => {
     chrome.storage.local.get(['apiKey'], (result) => {
@@ -7,22 +7,16 @@ export const getStoredApiKey = () => {
   });
 };
 
-export const setStoredApiKey = (apiKey) => {
+export const getStoredUserId = () => {
   return new Promise((resolve) => {
-    chrome.storage.local.set({ apiKey }, resolve);
-  });
-};
-
-export const getStoredPrimaryNode = () => {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(['primaryNode'], (result) => {
-      resolve(result.primaryNode || null);
+    chrome.storage.local.get(['userId'], (result) => {
+      resolve(result.userId || null);
     });
   });
 };
 
-export const setStoredPrimaryNode = (node) => {
+export const setStoredCredentials = (apiKey, userId) => {
   return new Promise((resolve) => {
-    chrome.storage.local.set({ primaryNode: node }, resolve);
+    chrome.storage.local.set({ apiKey, userId }, resolve);
   });
 };

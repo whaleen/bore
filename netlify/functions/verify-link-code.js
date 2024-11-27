@@ -2,17 +2,24 @@
 import prisma from './prisma'
 import crypto from 'crypto'
 
-exports.handler = async function (event, context) {
+export const handler = async function (event, context) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json',
   }
 
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers,
+      body: '',
+    }
+  }
+
   try {
     const { code } = JSON.parse(event.body)
 
-    // Find and validate code
     const linkCode = await prisma.linkCode.findFirst({
       where: {
         code,
@@ -34,10 +41,10 @@ exports.handler = async function (event, context) {
       }
     }
 
-    // Generate permanent API key
+    // Generate API key
     const apiKey = crypto.randomBytes(32).toString('hex')
 
-    // Save API key
+    // Create auth record
     await prisma.extensionAuth.create({
       data: {
         apiKey,
@@ -54,9 +61,13 @@ exports.handler = async function (event, context) {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ apiKey }),
+      body: JSON.stringify({
+        apiKey,
+        userId: linkCode.userId // Send back the Solana public key
+      }),
     }
   } catch (error) {
+    console.error('Error verifying link code:', error)
     return {
       statusCode: 500,
       headers,

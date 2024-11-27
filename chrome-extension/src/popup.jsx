@@ -4,76 +4,85 @@ import { createRoot } from 'react-dom/client'
 import NodeList from './components/NodeList'
 import PrimaryNode from './components/PrimaryNode'
 import ToggleSwitch from './components/ToggleSwitch'
-import { getStoredApiKey, setStoredApiKey } from './utils/storage'
+import {
+  getStoredApiKey,
+  getStoredUserId,
+  setStoredCredentials,
+} from './utils/storage'
 import './styles/popup.css'
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { hasError: false, error: null }
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error }
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('Error:', error)
-    console.error('Error Info:', errorInfo)
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className='error-container'>
-          <h3>Something went wrong</h3>
-          <pre>{this.state.error?.toString()}</pre>
-        </div>
-      )
-    }
-
-    return this.props.children
-  }
-}
+const API_URL = 'https://bore.nil.computer'
 
 function App() {
   const [isLinked, setIsLinked] = useState(false)
   const [linkCode, setLinkCode] = useState('')
   const [apiKey, setApiKey] = useState(null)
+  const [userId, setUserId] = useState(null)
   const [nodes, setNodes] = useState([])
   const [primaryNode, setPrimaryNode] = useState(null)
   const [isEnabled, setIsEnabled] = useState(false)
   const [error, setError] = useState(null)
-  const [isVerifying, setIsVerifying] = useState(false)
-  const API_URL = process.env.SITE_URL || 'https://bore.nil.computer'
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const init = async () => {
       try {
-        const storedApiKey = await getStoredApiKey()
-        if (storedApiKey) {
+        const [storedApiKey, storedUserId] = await Promise.all([
+          getStoredApiKey(),
+          getStoredUserId(),
+        ])
+
+        if (storedApiKey && storedUserId) {
           setApiKey(storedApiKey)
+          setUserId(storedUserId)
           setIsLinked(true)
-          // Fetch nodes will be implemented later
+          await fetchUserNodes(storedUserId, storedApiKey)
         }
       } catch (err) {
         console.error('Init error:', err)
         setError(err.message)
+      } finally {
+        setIsLoading(false)
       }
     }
     init()
   }, [])
 
-  const handleVerifyCode = async () => {
-    if (!linkCode || linkCode.length !== 6) {
-      setError('Please enter a valid 6-digit code')
-      return
+  const fetchUserNodes = async (currentUserId, currentApiKey) => {
+    try {
+      setError(null)
+      const response = await fetch(
+        `${API_URL}/.netlify/functions/user-nodes?userId=${currentUserId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${currentApiKey}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch nodes')
+      }
+
+      const data = await response.json()
+      setNodes(data)
+
+      // Find and set primary node
+      const primary = data.find((node) => node.isPrimary)
+      if (primary) {
+        setPrimaryNode(primary.node)
+      }
+    } catch (err) {
+      console.error('Error fetching nodes:', err)
+      setError('Failed to load your nodes')
     }
+  }
+
+  const handleVerifyCode = async () => {
+    if (linkCode.length !== 6) return
 
     try {
-      setIsVerifying(true)
       setError(null)
-
       const response = await fetch(
         `${API_URL}/.netlify/functions/verify-link-code`,
         {
@@ -91,58 +100,59 @@ function App() {
         throw new Error(data.error || 'Failed to verify code')
       }
 
-      // Store the API key
-      await setStoredApiKey(data.apiKey)
+      // Store both API key and userId
+      await setStoredCredentials(data.apiKey, data.userId)
       setApiKey(data.apiKey)
+      setUserId(data.userId)
       setIsLinked(true)
+
+      // Fetch initial nodes
+      await fetchUserNodes(data.userId, data.apiKey)
     } catch (err) {
       console.error('Verification error:', err)
-      setError(
-        'Failed to verify code. Please check your internet connection and try again.'
-      )
-    } finally {
-      setIsVerifying(false)
+      setError(err.message || 'Failed to verify code')
     }
   }
 
   const handleToggleProxy = async (enabled) => {
-    setIsEnabled(enabled)
+    if (!primaryNode) {
+      setError('No primary node selected')
+      return
+    }
 
-    if (enabled && primaryNode) {
-      // Configure Chrome proxy settings
-      const config = {
-        mode: 'fixed_servers',
-        rules: {
-          singleProxy: {
-            scheme: primaryNode.protocol.toLowerCase(),
-            host: primaryNode.ipAddress,
-            port: primaryNode.port,
+    try {
+      if (enabled) {
+        // Configure Chrome proxy settings
+        const config = {
+          mode: 'fixed_servers',
+          rules: {
+            singleProxy: {
+              scheme: primaryNode.protocol.toLowerCase(),
+              host: primaryNode.ipAddress,
+              port: primaryNode.port,
+            },
           },
-        },
-      }
+        }
 
-      try {
         await chrome.proxy.settings.set({
           value: config,
           scope: 'regular',
         })
-      } catch (err) {
-        console.error('Error setting proxy:', err)
-        setError('Failed to enable proxy')
-        setIsEnabled(false)
-      }
-    } else {
-      // Clear proxy settings
-      try {
+      } else {
+        // Clear proxy settings
         await chrome.proxy.settings.clear({
           scope: 'regular',
         })
-      } catch (err) {
-        console.error('Error clearing proxy:', err)
-        setError('Failed to disable proxy')
-        setIsEnabled(true)
       }
+      setIsEnabled(enabled)
+    } catch (err) {
+      console.error('Proxy toggle error:', err)
+      setError(`Failed to ${enabled ? 'enable' : 'disable'} proxy`)
     }
+  }
+
+  if (isLoading) {
+    return <div className='loading'>Loading...</div>
   }
 
   return (
@@ -160,7 +170,33 @@ function App() {
           <PrimaryNode node={primaryNode} />
           <NodeList
             nodes={nodes}
-            onSetPrimary={(node) => setPrimaryNode(node)}
+            onSetPrimary={async (node) => {
+              try {
+                const response = await fetch(
+                  `${API_URL}/.netlify/functions/set-primary-node`,
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                      userId,
+                      nodeId: node.id,
+                    }),
+                  }
+                )
+
+                if (!response.ok) {
+                  throw new Error('Failed to set primary node')
+                }
+
+                await fetchUserNodes(userId, apiKey)
+              } catch (err) {
+                console.error('Error setting primary node:', err)
+                setError('Failed to set primary node')
+              }
+            }}
           />
         </div>
       ) : (
@@ -183,9 +219,9 @@ function App() {
           <button
             className='link-button'
             onClick={handleVerifyCode}
-            disabled={isVerifying || linkCode.length !== 6}
+            disabled={linkCode.length !== 6}
           >
-            {isVerifying ? 'Verifying...' : 'Link Account'}
+            Link Account
           </button>
         </div>
       )}
@@ -200,9 +236,5 @@ document.addEventListener('DOMContentLoaded', () => {
     return
   }
   const root = createRoot(container)
-  root.render(
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  )
+  root.render(<App />)
 })
