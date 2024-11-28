@@ -1,0 +1,46 @@
+.
+├── README.md
+├── chrome_extension_tree.txt
+├── dist
+│   ├── assets
+│   │   ├── background.js
+│   │   ├── loading-page.js
+│   │   ├── popup.css
+│   │   └── popup.js
+│   ├── icons
+│   │   ├── icon128.png
+│   │   ├── icon16.png
+│   │   └── icon48.png
+│   ├── index.html
+│   ├── manifest.json
+│   └── service-worker-loader.js
+├── icons
+│   ├── icon128.png
+│   ├── icon16.png
+│   └── icon48.png
+├── index.html
+├── manifest.json
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── src
+│   ├── background.js
+│   ├── components
+│   │   ├── NodeList.jsx
+│   │   ├── PopupContent.jsx
+│   │   ├── PrimaryNode.jsx
+│   │   ├── ThemeToggle.jsx
+│   │   └── ToggleSwitch.jsx
+│   ├── contexts
+│   │   └── ThemeContext.jsx
+│   ├── popup.jsx
+│   ├── styles
+│   │   ├── popup.css
+│   │   └── tailwind.css
+│   └── utils
+│       ├── storage.js
+│       └── theme.js
+├── tailwind.config.js
+└── vite.config.js
+
+10 directories, 34 files

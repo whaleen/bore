@@ -12,8 +12,56 @@ import {
 } from './utils/storage'
 import './styles/tailwind.css'
 import './styles/popup.css'
+console.log('popup.jsx loaded')
 
 const API_URL = 'https://bore.nil.computer'
+
+const fetchUserNodes = async (currentUserId, currentApiKey, setError) => {
+  try {
+    setError(null)
+    const response = await fetch(
+      `${API_URL}/.netlify/functions/user-nodes?userId=${currentUserId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${currentApiKey}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      setError('Failed to fetch nodes')
+      return null
+    }
+
+    const data = await response.json()
+    return data
+  } catch (err) {
+    console.error('Error fetching nodes:', err)
+    setError('Failed to load your nodes')
+    return null
+  }
+}
+
+const fetchUserPreferences = async (userId, setError) => {
+  try {
+    setError(null)
+    const response = await fetch(
+      `${API_URL}/.netlify/functions/get-user-preferences?userId=${userId}`
+    )
+
+    if (!response.ok) {
+      setError('Failed to fetch user preferences')
+      return null
+    }
+
+    const data = await response.json()
+    return data
+  } catch (err) {
+    console.error('Error fetching user preferences:', err)
+    setError('Failed to load user preferences')
+    return null
+  }
+}
 
 function App() {
   const [isLinked, setIsLinked] = useState(false)
@@ -26,6 +74,37 @@ function App() {
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [theme, setTheme] = useState('dark')
+  const [deviceName, setDeviceName] = useState(null)
+
+  const handleEditDeviceName = async () => {
+    const newName = window.prompt('Device name:', deviceName)
+    if (!newName || newName === deviceName) return
+
+    try {
+      const storage = await chrome.storage.local.get('connectionId')
+      const response = await fetch(
+        `${API_URL}/.netlify/functions/update-device-name`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            userId,
+            connectionId: storage.connectionId,
+            deviceName: newName,
+          }),
+        }
+      )
+
+      if (!response.ok) throw new Error('Failed to update device name')
+      setDeviceName(newName)
+    } catch (err) {
+      console.error('Error updating device name:', err)
+      setError('Failed to update device name')
+    }
+  }
 
   useEffect(() => {
     const fetchLatestData = async () => {
@@ -37,11 +116,43 @@ function App() {
         ])
 
         if (storedApiKey && storedUserId) {
+          // Check preferences and connection status first
+          const prefsData = await fetchUserPreferences(storedUserId, setError)
+          if (!prefsData || !prefsData.connections?.length) {
+            // No active connections - unlink
+            await chrome.storage.local.clear()
+            setApiKey(null)
+            setUserId(null)
+            setIsLinked(false)
+            setPrimaryNode(null)
+            setNodes([])
+            return
+          }
+
+          // Add device name here
+          setDeviceName(prefsData.connections[0].deviceName)
+
           setApiKey(storedApiKey)
           setUserId(storedUserId)
           setIsLinked(true)
-          await fetchUserNodes(storedUserId, storedApiKey)
-          await fetchUserPreferences(storedUserId)
+
+          const nodesData = await fetchUserNodes(
+            storedUserId,
+            storedApiKey,
+            setError
+          )
+          if (nodesData) {
+            setNodes(nodesData)
+            // Find and set primary node
+            const primary = nodesData.find((node) => node.isPrimary)
+            if (primary) {
+              setPrimaryNode(primary.node)
+            }
+          }
+
+          if (prefsData) {
+            setTheme(prefsData.theme)
+          }
         }
       } catch (err) {
         console.error('Init error:', err)
@@ -53,68 +164,12 @@ function App() {
     fetchLatestData()
   }, [])
 
-  if (isLoading) {
-    return (
-      <div className='flex justify-center items-center'>
-        <span className='loading loading-spinner text-primary'></span>
-      </div>
-    )
-  }
-
   if (error) {
     return (
       <div className='alert alert-error shadow-lg rounded-lg p-4 mb-6'>
         <span>{error}</span>
       </div>
     )
-  }
-
-  const fetchUserNodes = async (currentUserId, currentApiKey) => {
-    try {
-      setError(null)
-      const response = await fetch(
-        `${API_URL}/.netlify/functions/user-nodes?userId=${currentUserId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${currentApiKey}`,
-          },
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch nodes')
-      }
-
-      const data = await response.json()
-      setNodes(data)
-
-      // Find and set primary node
-      const primary = data.find((node) => node.isPrimary)
-      if (primary) {
-        setPrimaryNode(primary.node)
-      }
-    } catch (err) {
-      console.error('Error fetching nodes:', err)
-      setError('Failed to load your nodes')
-    }
-  }
-
-  const fetchUserPreferences = async (userId) => {
-    try {
-      const response = await fetch(
-        `${API_URL}/.netlify/functions/get-user-preferences?userId=${userId}`
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch user preferences')
-      }
-
-      const data = await response.json()
-      setTheme(data.theme)
-    } catch (err) {
-      console.error('Error fetching user preferences:', err)
-      setError('Failed to load user preferences')
-    }
   }
 
   const handleVerifyCode = async () => {
@@ -147,11 +202,42 @@ function App() {
 
       // Store connection ID if available
       if (data.connection?.id) {
+        const platformInfo = await chrome.runtime.getPlatformInfo()
+        const browserInfo = navigator.userAgent.match(/Chrome\/([0-9.]+)/)[1]
+        const defaultName = `Chrome ${browserInfo} on ${platformInfo.os}`
+
+        // Let user customize the name
+        const customName = window.prompt('Device name:', defaultName)
+
         await chrome.storage.local.set({ connectionId: data.connection.id })
+
+        // Save the device name
+        await fetch(`${API_URL}/.netlify/functions/update-device-name`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${data.apiKey}`,
+          },
+          body: JSON.stringify({
+            userId: data.userId,
+            connectionId: data.connection.id,
+            deviceName: customName || defaultName,
+          }),
+        })
+
+        setDeviceName(customName || defaultName)
       }
 
       // Fetch initial nodes
-      await fetchUserNodes(data.userId, data.apiKey)
+      const nodesData = await fetchUserNodes(data.userId, data.apiKey, setError)
+      if (nodesData) {
+        setNodes(nodesData)
+        // Find and set primary node
+        const primary = nodesData.find((node) => node.isPrimary)
+        if (primary) {
+          setPrimaryNode(primary.node)
+        }
+      }
     } catch (err) {
       console.error('Verification error:', err)
       setError(err.message || 'Failed to verify code')
@@ -198,29 +284,35 @@ function App() {
   const handleUnlink = async () => {
     try {
       if (userId && apiKey) {
-        const storage = await chrome.storage.local.get('connectionId')
-        const response = await fetch(
-          `${API_URL}/.netlify/functions/manage-extension-connection`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-              action: 'revoke',
-              userId,
-              connectionId: storage.connectionId,
-            }),
-          }
-        )
+        try {
+          const storage = await chrome.storage.local.get('connectionId')
+          const response = await fetch(
+            `${API_URL}/.netlify/functions/manage-extension-connection`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`,
+              },
+              body: JSON.stringify({
+                action: 'revoke',
+                userId,
+                connectionId: storage.connectionId,
+              }),
+            }
+          )
 
-        if (!response.ok) {
-          throw new Error('Failed to revoke connection')
+          if (!response.ok) {
+            console.error('Failed to revoke connection on server')
+            // Don't throw here - continue with local cleanup
+          }
+        } catch (apiError) {
+          console.error('API error during unlink:', apiError)
+          // Don't rethrow - continue with local cleanup
         }
       }
 
-      // Clear stored credentials
+      // Clear stored credentials regardless of API success
       await chrome.storage.local.clear()
       setApiKey(null)
       setUserId(null)
@@ -244,6 +336,17 @@ function App() {
   return (
     <ThemeProvider initialTheme={theme}>
       <div className='bore-proxy-extension min-h-screen bg-base-100 text-base-content p-6 rounded-xl shadow-lg'>
+        {isLinked && (
+          <div className='text-xs text-gray-500 mb-4 flex justify-between items-center'>
+            <span>{deviceName}</span>
+            <button
+              onClick={handleEditDeviceName}
+              className='text-primary hover:text-primary-focus'
+            >
+              Edit
+            </button>
+          </div>
+        )}
         <h1 className='text-3xl font-bold mb-6 text-primary'>Bore Proxy</h1>
 
         {error && (
@@ -296,7 +399,7 @@ function App() {
                       throw new Error('Failed to set primary node')
                     }
 
-                    await fetchUserNodes(userId, apiKey)
+                    await fetchUserNodes(userId, apiKey, setError)
                   } catch (err) {
                     console.error('Error setting primary node:', err)
                     setError('Failed to set primary node')
@@ -311,7 +414,7 @@ function App() {
               Link Your Account
             </h2>
             <p className='text-base mb-4'>
-              Enter the 6-digit code from your account settings
+              Enter the 6-digit code from your account
             </p>
             <input
               type='text'
@@ -340,12 +443,24 @@ function App() {
   )
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+const initializeApp = () => {
   const container = document.getElementById('root')
   if (!container) {
-    console.error('Root element not found!')
+    console.log('Container not found, waiting...')
+    setTimeout(initializeApp, 10)
     return
   }
+  console.log('Mounting React app')
   const root = createRoot(container)
-  root.render(<App />)
-})
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  )
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp)
+} else {
+  initializeApp()
+}

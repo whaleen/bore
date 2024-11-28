@@ -1,26 +1,17 @@
-// chrome-extension/vite.config.js
 import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
 import react from '@vitejs/plugin-react';
 import manifest from './manifest.json';
+import path from 'path';
 
 export default defineConfig({
   plugins: [
     react(),
     crx({ manifest }),
   ],
-  build: {
-    outDir: 'dist',
-    rollupOptions: {
-      input: {
-        popup: 'index.html',
-        background: 'src/background.js',
-      },
-      output: {
-        entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name].[ext]',
-      },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
     },
   },
   define: {
@@ -28,4 +19,18 @@ export default defineConfig({
       SITE_URL: JSON.stringify(process.env.SITE_URL || 'https://bore.nil.computer'),
     },
   },
+  server: {
+    port: 5174,
+    strictPort: true,
+    hmr: {
+      port: 5174,
+      host: 'localhost',
+    },
+    proxy: {
+      '/.netlify/functions': {
+        target: 'http://localhost:8888',
+        changeOrigin: true,
+      },
+    },
+  }
 });
