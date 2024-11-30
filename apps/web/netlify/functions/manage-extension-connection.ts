@@ -1,3 +1,4 @@
+// apps/web/netlify/functions/manage-extension-connection.ts
 import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 import type { ExtensionConnection, ExtensionAuth } from '@prisma/client'

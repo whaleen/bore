@@ -1,3 +1,4 @@
+// apps/web/netlify/functions/edit-node.ts
 import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 import type { Node } from '@prisma/client'

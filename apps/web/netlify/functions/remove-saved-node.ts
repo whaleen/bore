@@ -1,3 +1,4 @@
+// apps/web/netlify/functions/remove-saved-node.ts
 import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 

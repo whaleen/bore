@@ -1,3 +1,4 @@
+// apps/web/netlify/functions/update-user-preferences.ts
 import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 import type { User } from '@prisma/client'

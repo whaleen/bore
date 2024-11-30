@@ -1,3 +1,4 @@
+// apps/web/netlify/functions/update-device-name.ts
 import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 import type { ExtensionConnection } from '@prisma/client'

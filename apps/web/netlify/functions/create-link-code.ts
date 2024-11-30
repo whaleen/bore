@@ -1,3 +1,4 @@
+// apps/web/netlify/functions/create-link-code.ts
 import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 import type { LinkCode } from '@prisma/client'

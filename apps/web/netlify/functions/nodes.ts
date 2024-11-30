@@ -1,3 +1,4 @@
+// apps/web/netlify/functions/nodes.ts
 import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 

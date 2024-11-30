@@ -1,3 +1,4 @@
+// apps/web/netlify/functions/get-user-preferences.ts
 import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 import type { User, ExtensionConnection } from '@prisma/client'

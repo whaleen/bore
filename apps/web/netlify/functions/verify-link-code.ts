@@ -1,3 +1,4 @@
+// apps/web/netlify/functions/verify-link-code.ts
 import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 import crypto from 'crypto'
