@@ -2,14 +2,18 @@
   "name": "@bore/web",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "type": "commonjs",
   "prisma": {
     "schema": "prisma/schema.prisma"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:functions": "tsc -p netlify/functions/tsconfig.json",
+    "build": "vite build && pnpm run build:functions",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^2.8.2"
   }
 }

@@ -1,7 +1,7 @@
-// netlify/functions/nodes.js
+import { Handler } from '@netlify/functions'
 import prisma from './prisma'
 
-exports.handler = async function (event, context) {
+export const handler: Handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -36,9 +36,10 @@ exports.handler = async function (event, context) {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to fetch nodes', details: error.message }),
+      body: JSON.stringify({
+        error: 'Failed to fetch nodes',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      }),
     }
-  } finally {
-    await prisma.$disconnect()
   }
 }
