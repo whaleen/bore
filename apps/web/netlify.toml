@@ -8,8 +8,8 @@ npx prisma generate
 cd ../..
 pnpm run build:web
 """
-publish = "apps/web/dist"
-functions = "apps/web/netlify/functions"
+publish = "dist"
+functions = "netlify/functions"
 
 [functions]
 node_bundler = "esbuild"
