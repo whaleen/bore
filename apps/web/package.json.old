@@ -1,18 +1,13 @@
 {
+  "name": "web",
   "private": true,
-  "name": "bore-monorepo",
-  "version": "1.0.0",
-  "packageManager": "pnpm@7.10.0",
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev:web": "netlify dev --command \"turbo run dev --filter web\"",
-    "build:web": "pnpm --filter web build",
-    "lint:web": "pnpm --filter web lint",
-    "dev:chrome-extension": "pnpm --filter chrome-extension dev",
-    "build:chrome-extension": "pnpm --filter chrome-extension build",
-    "lint:chrome-extension": "pnpm --filter chrome-extension lint",
-    "storybook": "pnpm --filter @bore/ui storybook",
-    "build": "turbo run build",
-    "dev": "turbo run dev"
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@faker-js/faker": "^9.2.0",
@@ -38,9 +33,7 @@
     "tailwindcss": "^3.4.15"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^2.0.0-beta.23",
     "@eslint/js": "^9.15.0",
-    "@storybook/addon-themes": "^8.4.6",
     "@types/node": "^22.10.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -50,8 +43,6 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.12.0",
-    "rollup-plugin-copy": "^3.5.0",
-    "turbo": "latest",
     "vite": "^6.0.0"
   }
 }

@@ -1,0 +1,10 @@
+{
+  "appId": "computer.nil.bore",
+  "appName": "bore desktop",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  }
+}

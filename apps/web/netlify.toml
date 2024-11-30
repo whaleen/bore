@@ -1,0 +1,21 @@
+[build]
+command = "npx prisma generate && pnpm run build:web"
+functions = "netlify/functions"
+publish = "dist"
+
+[functions]
+node_bundler = "esbuild"
+external_node_modules = ["@prisma/client"]
+
+[dev]
+framework = "#custom"
+command = "pnpm run dev"
+targetPort = 5173        # The Vite dev server port
+port = 8888              # The Netlify dev server port
+publish = "dist"
+autoLaunch = true
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
