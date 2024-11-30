@@ -3,14 +3,18 @@
   "name": "bore-monorepo",
   "version": "1.0.0",
   "packageManager": "pnpm@7.10.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev:web": "netlify dev --command \"turbo run dev --filter web\"",
-    "build:web": "turbo run build --filter=web...",
-    "lint:web": "pnpm --filter web lint",
-    "dev:chrome-extension": "pnpm --filter chrome-extension dev",
-    "build:chrome-extension": "pnpm --filter chrome-extension build",
-    "lint:chrome-extension": "pnpm --filter chrome-extension lint",
-    "storybook": "pnpm --filter @bore/ui storybook",
+    "dev:web": "netlify dev --command \"turbo run dev --filter @bore/web\"",
+    "build:web": "turbo run build --filter @bore/web",
+    "lint:web": "turbo run lint --filter @bore/web",
+    "dev:chrome-extension": "turbo run dev --filter @bore/chrome-extension",
+    "build:chrome-extension": "turbo run build --filter @bore/chrome-extension",
+    "lint:chrome-extension": "turbo run lint --filter @bore/chrome-extension",
+    "storybook": "turbo run storybook --filter @bore/ui",
     "build": "turbo run build",
     "dev": "turbo run dev"
   },

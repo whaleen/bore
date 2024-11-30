@@ -3,15 +3,17 @@ base = "apps/web"
 command = """
 cd ../..
 pnpm install
+cd apps/web
 npx prisma generate
+cd ../..
 pnpm run build:web
 """
 publish = "apps/web/dist"
+functions = "apps/web/netlify/functions"
 
 [functions]
 node_bundler = "esbuild"
 external_node_modules = ["@prisma/client"]
-directory = "apps/web/netlify/functions"
 
 [dev]
 framework = "#custom"
