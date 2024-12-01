@@ -14,7 +14,7 @@ export function ToggleSwitch({ enabled, onToggle, label }: ToggleSwitchProps) {
           type="checkbox"
           checked={enabled}
           onChange={(e) => onToggle(e.target.checked)}
-          className="toggle toggle-success"
+          className="toggle toggle-success toggle-lg"
         />
       </label>
       {label && (

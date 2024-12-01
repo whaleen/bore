@@ -3,10 +3,7 @@ import { useEffect, useState } from 'react'
 import { useTheme } from './ThemeContext'
 import { Sun, Moon, Laptop, X, RefreshCw } from 'lucide-react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { FaChrome, FaEdge, FaOpera } from 'react-icons/fa'
-import { TbBrandVivaldi } from 'react-icons/tb'
-
-import { FaBrave } from 'react-icons/fa6'
+import { NodeList } from '@bore/ui'
 
 function AccountSettings() {
   const [savedNodes, setSavedNodes] = useState([])
@@ -68,7 +65,7 @@ function AccountSettings() {
       setIsGeneratingCode(true)
       setError(null)
 
-      const response = await fetch('/.netlify/functions/generate-link-code', {
+      const response = await fetch('/.netlify/functions/create-link-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -216,6 +213,11 @@ function AccountSettings() {
       {/* Theme Settings Section */}
       <div className='mb-8 p-6 bg-base-200 rounded-lg'>
         <h2 className='text-xl font-semibold mb-4'>Theme Preferences</h2>
+        <p className='text-gray-400'>
+          Set the theme of the app to light or dark mode. Your preference will
+          persist across all Solana wallet account-connected applications and
+          connected devices.
+        </p>
         <div className='flex gap-4'>
           <button
             onClick={toggleTheme}
@@ -239,59 +241,17 @@ function AccountSettings() {
       {/* Extension Management Section */}
       <div className='mb-8 p-6 border border-base-300 rounded-lg'>
         <h2 className='text-xl font-semibold mb-4'>Chrome Extensions</h2>
-        <div className='text-xs my-4'>
-          <div className=''>
-            <div className='flex-1'>
-              <span className='text-sm'>Supported Browsers:</span>
-              <div className='flex gap-4 mt-2'>
-                {/* Chrome Icon */}
-                <div className='flex items-center'>
-                  <FaChrome
-                    size={12}
-                    className='text-blue-500'
-                  />
-                  <span className='ml-2'>Chrome</span>
-                </div>
+        <p>
+          Install the{' '}
+          <a
+            href=''
+            className='link'
+          >
+            Chrome Extension
+          </a>{' '}
+          and generate a code below to link it to your account.{' '}
+        </p>
 
-                {/* Edge Icon */}
-                <div className='flex items-center'>
-                  <FaEdge
-                    size={12}
-                    className='text-teal-500'
-                  />
-                  <span className='ml-2'>Edge</span>
-                </div>
-
-                {/* Opera Icon */}
-                <div className='flex items-center'>
-                  <FaOpera
-                    size={12}
-                    className='text-red-500'
-                  />
-                  <span className='ml-2'>Opera</span>
-                </div>
-
-                {/* Brave Icon */}
-                <div className='flex items-center'>
-                  <FaBrave
-                    size={12}
-                    className='text-orange-500'
-                  />
-                  <span className='ml-2'>Brave</span>
-                </div>
-
-                {/* Vivaldi Icon */}
-                <div className='flex items-center'>
-                  <TbBrandVivaldi
-                    size={12}
-                    className='text-green-500'
-                  />
-                  <span className='ml-2'>Vivaldi</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
         {connections &&
         connections.filter((conn) => conn?.isActive).length > 0 ? (
           <div className='space-y-4'>
@@ -368,7 +328,12 @@ function AccountSettings() {
       {/* Primary Node Section */}
       {primaryNode && (
         <div className='mb-8 p-6 bg-base-200 rounded-lg'>
-          <h2 className='text-xl font-semibold mb-4'>Primary Node</h2>
+          <h2 className='text-xl text-content mb-4'>Primary Node</h2>
+          <p className='text-content mb-4'>
+            Your "primary node" will be the default connection in any of your
+            devices. Maybe it should be called default node.
+          </p>
+
           <div className='border border-base-300 rounded-lg p-4'>
             <div>
               <h3 className='text-lg font-semibold'>{primaryNode.node.name}</h3>
@@ -395,43 +360,19 @@ function AccountSettings() {
       {/* Saved Nodes Section */}
       <div className='mb-8'>
         <h2 className='text-xl font-semibold mb-4'>Saved Nodes</h2>
-        {otherNodes.length === 0 ? (
+        {savedNodes.length === 0 ? (
           <p className='text-gray-400'>
-            You haven't saved any other nodes yet.
+            You haven't saved any nodes yet. Browse the node directory to find
+            some nodes to hit. You can search by location and other stuff.{' '}
           </p>
         ) : (
-          <div className='space-y-4'>
-            {otherNodes.map((saved) => (
-              <div
-                key={saved.node.id}
-                className='border border-base-300 rounded-lg p-4 flex justify-between items-center'
-              >
-                <div>
-                  <h3 className='text-lg font-semibold'>{saved.node.name}</h3>
-                  <p className='text-gray-400'>
-                    {saved.node.country} ({saved.node.countryCode}) -{' '}
-                    {saved.node.region}
-                  </p>
-                </div>
-                <div className='flex gap-2'>
-                  {!saved.isPrimary && (
-                    <button
-                      onClick={() => handleSetPrimary(saved.node.id)}
-                      className='btn btn-success btn-sm'
-                    >
-                      Set as Primary
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleRemoveNode(saved.node.id)}
-                    className='btn btn-error btn-sm'
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <NodeList
+            nodes={savedNodes.map((saved) => saved.node)}
+            primaryNodeId={savedNodes.find((node) => node.isPrimary)?.node.id}
+            onRemoveNode={handleRemoveNode}
+            onSetPrimary={handleSetPrimary}
+            className='mt-4'
+          />
         )}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { getCountriesList } from '../utils/location'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { Button, InputField, SelectField, Checkbox, Textarea } from '@bore/ui' // Import Textarea
 
 function ProxySubmissionForm() {
   const { publicKey } = useWallet()
@@ -117,86 +118,56 @@ function ProxySubmissionForm() {
       >
         {/* Node Name */}
         <div className='form-control'>
-          <label className='label'>
-            <span className='label-text'>Node Name</span>
-          </label>
-          <input
-            type='text'
+          <InputField
             name='name'
             value={formData.name}
             onChange={handleChange}
             placeholder='e.g., US East Node 1'
-            className='input input-bordered'
+            label='Node Name'
             required
           />
         </div>
 
         {/* Country Select */}
-        <div className='form-control'>
-          <label className='label'>
-            <span className='label-text'>Country</span>
-          </label>
-          <select
-            name='country'
-            value={formData.country}
-            onChange={handleChange}
-            className='select select-bordered'
-            required
-          >
-            <option value=''>Select a country</option>
-            {countries.map((country) => (
-              <option
-                key={country.code}
-                value={country.name}
-              >
-                {country.name} ({country.region})
-              </option>
-            ))}
-          </select>
-        </div>
+        <SelectField
+          name='country'
+          value={formData.country}
+          onChange={handleChange}
+          label='Country'
+          options={countries.map((country) => country.name)} // Pass country names as options
+          required
+        />
 
         {/* IP, Protocol, Port */}
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <div className='form-control'>
-            <label className='label'>
-              <span className='label-text'>IP Address</span>
-            </label>
-            <input
+            <InputField
               type='text'
               name='ipAddress'
               value={formData.ipAddress}
               onChange={handleChange}
               placeholder='192.168.1.1'
-              className='input input-bordered'
+              label='IP Address'
               required
             />
           </div>
           <div className='form-control'>
-            <label className='label'>
-              <span className='label-text'>Protocol</span>
-            </label>
-            <select
+            <SelectField
               name='protocol'
               value={formData.protocol}
               onChange={handleChange}
-              className='select select-bordered'
-            >
-              <option value='HTTP'>HTTP</option>
-              <option value='HTTPS'>HTTPS</option>
-              <option value='SOCKS5'>SOCKS5</option>
-            </select>
+              label='Protocol'
+              options={['HTTP', 'HTTPS', 'SOCKS5']} // Protocol options
+            />
           </div>
           <div className='form-control'>
-            <label className='label'>
-              <span className='label-text'>Port</span>
-            </label>
-            <input
+            <InputField
               type='number'
               name='port'
               value={formData.port}
               onChange={handleChange}
               placeholder='8080'
-              className='input input-bordered'
+              label='Port'
               required
             />
           </div>
@@ -205,64 +176,49 @@ function ProxySubmissionForm() {
         {/* Optional Fields */}
         <div className='grid grid-cols-2 gap-4'>
           <div className='form-control'>
-            <label className='label'>
-              <span className='label-text'>Username (Optional)</span>
-            </label>
-            <input
+            <InputField
               type='text'
               name='username'
               value={formData.username}
               onChange={handleChange}
               placeholder='username'
-              className='input input-bordered'
+              label='Username (Optional)'
             />
           </div>
           <div className='form-control'>
-            <label className='label'>
-              <span className='label-text'>Password (Optional)</span>
-            </label>
-            <input
+            <InputField
               type='password'
               name='password'
               value={formData.password}
               onChange={handleChange}
               placeholder='password'
-              className='input input-bordered'
+              label='Password (Optional)'
             />
           </div>
         </div>
 
         {/* UDP Support */}
         <div className='form-control'>
-          <label className='cursor-pointer flex items-center space-x-2'>
-            <input
-              type='checkbox'
-              name='supportsUDP'
-              checked={formData.supportsUDP}
-              onChange={handleChange}
-              className='checkbox'
-            />
-            <span className='label-text'>Supports UDP</span>
-          </label>
+          <Checkbox
+            label='Supports UDP'
+            checked={formData.supportsUDP}
+            onChange={handleChange}
+            name='supportsUDP'
+          />
         </div>
 
         {/* Notes */}
         <div className='form-control'>
-          <label className='label'>
-            <span className='label-text'>Notes (Optional)</span>
-          </label>
-          <textarea
-            name='notes'
+          <Textarea
+            placeholder='Additional information about the node'
             value={formData.notes}
             onChange={handleChange}
-            placeholder='Additional information about the node'
-            className='textarea textarea-bordered'
-            rows={4}
-          ></textarea>
+            label='Notes (Optional)'
+          />
         </div>
 
         {/* Submit Button */}
-        <button
+        <Button
           type='submit'
           disabled={loading}
           className={`btn btn-block ${
@@ -270,7 +226,7 @@ function ProxySubmissionForm() {
           }`}
         >
           {loading ? 'Submitting...' : 'Submit Node'}
-        </button>
+        </Button>
       </form>
     </div>
   )

@@ -1,16 +1,18 @@
 // packages/ui/src/components/theme/ThemeToggle.tsx
-import { Sun, Moon } from 'lucide-react'
+import { useTheme } from './ThemeContext';
+import { Sun, Moon } from 'lucide-react';
 
 interface ThemeToggleProps {
-  theme: string;
-  onToggle: () => void;
+  className?: string;
 }
 
-export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
+export function ThemeToggle({ className = '' }: ThemeToggleProps) {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <button
-      onClick={onToggle}
-      className="p-2 rounded-lg bg-base-200 hover:bg-base-300 transition-colors"
+      onClick={toggleTheme}
+      className={`p-2 rounded-lg bg-base-200 hover:bg-base-300 transition-colors ${className}`}
       aria-label="Toggle theme"
     >
       {theme === 'light' ? (
@@ -19,5 +21,5 @@ export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
         <Sun className="w-5 h-5" />
       )}
     </button>
-  )
+  );
 }

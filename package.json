@@ -11,7 +11,7 @@
     "dev:web": "netlify dev --command \"turbo run dev --filter @bore/web\"",
     "build:web": "turbo run build --filter @bore/web",
     "lint:web": "turbo run lint --filter @bore/web",
-    "dev:chrome-extension": "turbo run dev --filter @bore/chrome-extension",
+    "dev:chrome-extension": "pnpm --cwd apps/chrome-extension dlx vite --debug --config vite.config.js",
     "build:chrome-extension": "turbo run build --filter @bore/chrome-extension",
     "lint:chrome-extension": "turbo run lint --filter @bore/chrome-extension",
     "storybook": "turbo run storybook --filter @bore/ui",

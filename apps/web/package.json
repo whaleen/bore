@@ -11,9 +11,14 @@
     "build:functions": "tsc -p netlify/functions/tsconfig.json",
     "build": "vite build && pnpm run build:functions",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed": "node prisma/seed.js"
   },
   "devDependencies": {
-    "@netlify/functions": "^2.8.2"
+    "@netlify/functions": "^2.8.2",
+    "boring-name-generator": "^1.0.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
   }
 }

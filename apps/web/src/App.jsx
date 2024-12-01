@@ -83,7 +83,7 @@ function App() {
                 path='/'
                 element={
                   <>
-                    <h1 className='text-2xl font-bold mb-6'>Available Nodes</h1>
+                    <h1 className='text-2xl font-bold mb-6'>Node Directory</h1>
                     <NodeList />
                   </>
                 }

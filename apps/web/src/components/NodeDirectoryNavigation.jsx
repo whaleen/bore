@@ -1,9 +1,9 @@
-// src/components/NodeDirectoryNavigation.jsx
+// apps/web/src/components/NodeDirectoryNavigation.jsx
 import { useState } from 'react'
 import { Search } from 'lucide-react'
-import CountrySelect from './CountrySelect'
+import { Button, CountrySelect } from '@bore/ui'
 
-function NodeDirectoryNavigation({ onFiltersChange, nodes }) {
+export const NodeDirectoryNavigation = ({ onFiltersChange, nodes }) => {
   const [filters, setFilters] = useState({
     status: 'all',
     search: '',
@@ -19,25 +19,25 @@ function NodeDirectoryNavigation({ onFiltersChange, nodes }) {
   return (
     <div className='mb-6 space-y-4'>
       {/* Status Filters */}
-      <div className='btn-group'>
-        <button
+      <div className='flex gap-2'>
+        <Button
+          variant={filters.status === 'all' ? 'primary' : 'outline'}
           onClick={() => handleFilterChange('status', 'all')}
-          className={`btn ${filters.status === 'all' ? 'btn-active' : ''}`}
         >
           All Nodes
-        </button>
-        <button
+        </Button>
+        <Button
+          variant={filters.status === 'active' ? 'primary' : 'outline'}
           onClick={() => handleFilterChange('status', 'active')}
-          className={`btn ${filters.status === 'active' ? 'btn-active' : ''}`}
         >
           Active
-        </button>
-        <button
+        </Button>
+        <Button
+          variant={filters.status === 'inactive' ? 'primary' : 'outline'}
           onClick={() => handleFilterChange('status', 'inactive')}
-          className={`btn ${filters.status === 'inactive' ? 'btn-active' : ''}`}
         >
           Inactive
-        </button>
+        </Button>
       </div>
 
       <div className='flex gap-4 flex-wrap md:flex-nowrap'>

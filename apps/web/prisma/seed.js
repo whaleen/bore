@@ -1,14 +1,13 @@
-// prisma/seed.js
-import { PrismaClient } from '@prisma/client';
-import { faker } from '@faker-js/faker';
-import { getCode, getName } from 'country-list'; // Added import
+const { PrismaClient } = require('@prisma/client');
+const { faker } = require('@faker-js/faker');
+const { getCode, getName } = require('country-list');
+
+var generate = require('boring-name-generator');
+generate({ number: true }).dashed;
 
 const prisma = new PrismaClient();
 
-// Available protocols
 const protocols = ['HTTP', 'HTTPS', 'SOCKS5'];
-
-// Function to get a random protocol
 const randomProtocol = () => protocols[Math.floor(Math.random() * protocols.length)];
 
 function generateFakeSolanaAddress() {
@@ -20,16 +19,9 @@ function generateFakeSolanaAddress() {
   return fakeAddy;
 }
 
-// Function to generate a random port number
-const randomPort = () => {
-  // Random port number between 1024 and 65535
-  return Math.floor(Math.random() * (65535 - 1024 + 1)) + 1024;
-};
-
-// Function to generate random supportsUDP (boolean)
+const randomPort = () => Math.floor(Math.random() * (65535 - 1024 + 1)) + 1024;
 const randomSupportsUDP = () => Math.random() < 0.5;
 
-// Seeding function to create nodes
 const seedNodes = async () => {
   const nodeCount = 10;
   for (let i = 0; i < nodeCount; i++) {
@@ -37,13 +29,13 @@ const seedNodes = async () => {
     const country = getName(countryCode);
 
     const nodeData = {
-      name: generateFakeSolanaAddress(), // Use the corrected function
+      name: generate({ number: true }).dashed, // Updated to use boring-name-generator
       country,
       countryCode,
       ipAddress: faker.internet.ip(),
       protocol: randomProtocol(),
       port: randomPort(),
-      region: 'Earth', // Hardcoded region
+      region: 'Earth',
       supportsUDP: randomSupportsUDP(),
       isActive: randomSupportsUDP(),
       notes: faker.lorem.sentence(),
@@ -57,7 +49,6 @@ const seedNodes = async () => {
   }
 };
 
-// Seed function
 const seed = async () => {
   try {
     await seedNodes();

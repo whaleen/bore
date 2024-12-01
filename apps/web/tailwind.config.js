@@ -26,7 +26,7 @@ export default {
           "error": "#EF4444",            // Error red
 
           ".btn": {
-            "border-radius": "0.5rem",    // Rounded buttons
+            "border-radius": "0.1rem",    // Rounded buttons
           },
 
           ".card": {

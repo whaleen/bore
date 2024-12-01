@@ -1,10 +1,7 @@
 // chrome-extension/src/popup.jsx
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ThemeProvider } from './contexts/ThemeContext'
-import NodeList from './components/NodeList'
-import PrimaryNode from './components/PrimaryNode'
-import ToggleSwitch from './components/ToggleSwitch'
+import { ThemeProvider, NodeList, PrimaryNode, ToggleSwitch } from '@bore/ui'
 import {
   getStoredApiKey,
   getStoredUserId,
@@ -13,8 +10,8 @@ import {
 } from './utils/storage'
 import './styles/tailwind.css'
 import './styles/popup.css'
-console.log('popup.jsx loaded')
 
+// do env vars here retard:
 // const API_URL = 'https://bore.nil.computer'
 const API_URL = 'http://localhost:8888'
 
@@ -75,8 +72,8 @@ function App() {
   const [isEnabled, setIsEnabled] = useState(false)
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [theme, setTheme] = useState('dark')
   const [deviceName, setDeviceName] = useState(null)
+  const [initialTheme, setInitialTheme] = useState('dark')
 
   const handleEditDeviceName = async () => {
     const newName = window.prompt('Device name:', deviceName)
@@ -108,20 +105,45 @@ function App() {
     }
   }
 
+  // Add handler for theme changes from the shared ThemeProvider
+  const handleThemeChange = async (newTheme) => {
+    if (!userId) return
+
+    try {
+      const response = await fetch(
+        `${API_URL}/.netlify/functions/update-user-preferences`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            userId,
+            theme: newTheme,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to update theme preference')
+      }
+    } catch (error) {
+      console.error('Failed to sync theme preference:', error)
+    }
+  }
+
   useEffect(() => {
     const fetchLatestData = async () => {
       try {
-        console.log('Fetching latest data...')
         const [storedApiKey, storedUserId] = await Promise.all([
           getStoredApiKey(),
           getStoredUserId(),
         ])
 
         if (storedApiKey && storedUserId) {
-          // Check preferences and connection status first
           const prefsData = await fetchUserPreferences(storedUserId, setError)
           if (!prefsData || !prefsData.connections?.length) {
-            // No active connections - unlink
             await chrome.storage.local.clear()
             setApiKey(null)
             setUserId(null)
@@ -131,7 +153,11 @@ function App() {
             return
           }
 
-          // Add device name here
+          // Set initial theme from user preferences
+          if (prefsData.theme) {
+            setInitialTheme(prefsData.theme)
+          }
+
           setDeviceName(prefsData.connections[0].deviceName)
 
           setApiKey(storedApiKey)
@@ -145,15 +171,10 @@ function App() {
           )
           if (nodesData) {
             setNodes(nodesData)
-            // Find and set primary node
             const primary = nodesData.find((node) => node.isPrimary)
             if (primary) {
               setPrimaryNode(primary.node)
             }
-          }
-
-          if (prefsData) {
-            setTheme(prefsData.theme)
           }
         }
       } catch (err) {
@@ -175,7 +196,7 @@ function App() {
   }
 
   const handleVerifyCode = async () => {
-    if (linkCode.length !== 6) return
+    if (linkCode.length !== 8) return
 
     try {
       setError(null)
@@ -354,7 +375,11 @@ function App() {
   }
 
   return (
-    <ThemeProvider initialTheme={theme}>
+    <ThemeProvider
+      initialTheme={initialTheme}
+      onThemeChange={handleThemeChange}
+      storageKey='bore-extension-theme'
+    >
       <div className='min-h-screen'>
         {isLinked && (
           <div className='text-xs mb-4 flex justify-between items-center'>
@@ -367,7 +392,6 @@ function App() {
             </button>
           </div>
         )}
-        {/* <h1 className='text-3xl font-bold mb-12'>Bore Proxy</h1> */}
 
         {error && (
           <div className='alert alert-error shadow-lg rounded-lg p-4 mb-6'>
@@ -390,12 +414,10 @@ function App() {
 
             <div className='mb-6'>
               <NodeList
-                nodes={nodes}
-                onSetPrimary={async (node) => {
+                nodes={nodes.map((n) => n.node)} // Transform to expected structure
+                primaryNodeId={nodes.find((n) => n.isPrimary)?.node.id}
+                onSetPrimary={async (nodeId) => {
                   try {
-                    console.log('Setting primary node:', node)
-                    console.log('Using apiKey:', apiKey)
-
                     const response = await fetch(
                       `${API_URL}/.netlify/functions/set-primary-node`,
                       {
@@ -406,16 +428,12 @@ function App() {
                         },
                         body: JSON.stringify({
                           userId,
-                          nodeId: node.id,
+                          nodeId,
                         }),
                       }
                     )
 
                     const data = await response.json()
-                    console.log('Set primary response:', {
-                      status: response.status,
-                      data,
-                    })
 
                     if (!response.ok) {
                       throw new Error(
@@ -471,12 +489,12 @@ function App() {
               >
                 bore.nil.computer/register
               </a>{' '}
-              and create your account
+              and create your account big guy
             </p>
-            <p className='mb-4'>Then enter the 6-digit code below</p>
+            <p className='mb-4'>Then enter the 8-digit code below</p>
             <h2 className='text-xl font-semibold mb-4'>Link Your Account</h2>
             <p className='text-base mb-4'>
-              Enter the 6-digit code from your account
+              Enter the 8-digit code from your account
             </p>
             <input
               type='text'
@@ -484,17 +502,18 @@ function App() {
               placeholder='Enter code'
               value={linkCode}
               onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, '')
-                if (value.length <= 6) {
-                  setLinkCode(value)
+                const value = e.target.value
+                if (value.length <= 8) {
+                  setLinkCode(value) // Allow letters and numbers
                 }
               }}
-              maxLength={6}
+              maxLength={8} // This ensures no input beyond 6 characters
             />
+
             <button
               className='btn btn-primary w-full'
               onClick={handleVerifyCode}
-              disabled={linkCode.length !== 6}
+              disabled={linkCode.length !== 8}
             >
               Link Account
             </button>
@@ -514,11 +533,7 @@ const initializeApp = () => {
   }
   console.log('Mounting React app')
   const root = createRoot(container)
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  )
+  root.render(<App />)
 }
 
 if (document.readyState === 'loading') {
