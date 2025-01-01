@@ -8,8 +8,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "netlify dev --command \"turbo run dev --filter @bore/web\"",
-    "build:web": "turbo run build --filter @bore/web",
+    "prisma:generate": "npx prisma generate --schema apps/web/prisma/schema.prisma",
+    "dev:web": "pnpm --filter @bore/web run dev",
+    "build:web": "pnpm run prisma:generate && turbo run build --filter @bore/web",
     "lint:web": "turbo run lint --filter @bore/web",
     "dev:chrome-extension": "pnpm --cwd apps/chrome-extension dlx vite --debug --config vite.config.js",
     "build:chrome-extension": "turbo run build --filter @bore/chrome-extension",
@@ -45,6 +46,7 @@
     "@crxjs/vite-plugin": "^2.0.0-beta.23",
     "@eslint/js": "^9.15.0",
     "@storybook/addon-themes": "^8.4.6",
+    "@types/express": "^5.0.0",
     "@types/node": "^22.10.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -53,9 +55,13 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
+    "express": "^4.21.1",
     "globals": "^15.12.0",
+    "netlify-cli": "^17.37.2",
     "rollup-plugin-copy": "^3.5.0",
+    "tsoa": "^6.5.1",
     "turbo": "latest",
+    "typescript": "~5.1.6",
     "vite": "^6.0.0"
   }
 }

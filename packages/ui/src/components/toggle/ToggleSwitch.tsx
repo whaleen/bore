@@ -1,15 +1,10 @@
 // packages/ui/src/components/toggle/ToggleSwitch.tsx
-interface ToggleSwitchProps {
-  enabled: boolean;
-  onToggle: (value: boolean) => void;
-  label?: string;
-}
+import { ToggleSwitchProps } from './types';
 
-export function ToggleSwitch({ enabled, onToggle, label }: ToggleSwitchProps) {
+export function ToggleSwitch({ enabled, onToggle, label, className = '' }: ToggleSwitchProps) {
   return (
     <div className="flex items-center space-x-4 flex-col justify-center">
-
-      <label className="">
+      <label className={className}>
         <input
           type="checkbox"
           checked={enabled}
@@ -23,5 +18,5 @@ export function ToggleSwitch({ enabled, onToggle, label }: ToggleSwitchProps) {
         </span>
       )}
     </div>
-  )
+  );
 }

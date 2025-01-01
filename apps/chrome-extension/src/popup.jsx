@@ -6,20 +6,17 @@ import {
   getStoredApiKey,
   getStoredUserId,
   setStoredCredentials,
-  getAuthHeaders,
 } from './utils/storage'
 import './styles/tailwind.css'
 import './styles/popup.css'
 
-// do env vars here retard:
-// const API_URL = 'https://bore.nil.computer'
-const API_URL = 'http://localhost:8888'
+const API_URL = 'http://localhost:9999'
 
 const fetchUserNodes = async (currentUserId, currentApiKey, setError) => {
   try {
     setError(null)
     const response = await fetch(
-      `${API_URL}/.netlify/functions/user-nodes?userId=${currentUserId}`,
+      `${API_URL}/.netlify/functions/nodes-saved?userId=${currentUserId}`,
       {
         headers: {
           Authorization: `Bearer ${currentApiKey}`,
@@ -33,7 +30,7 @@ const fetchUserNodes = async (currentUserId, currentApiKey, setError) => {
     }
 
     const data = await response.json()
-    return data
+    return data.nodes
   } catch (err) {
     console.error('Error fetching nodes:', err)
     setError('Failed to load your nodes')
@@ -45,7 +42,7 @@ const fetchUserPreferences = async (userId, setError) => {
   try {
     setError(null)
     const response = await fetch(
-      `${API_URL}/.netlify/functions/get-user-preferences?userId=${userId}`
+      `${API_URL}/.netlify/functions/auth-users?userId=${userId}`
     )
 
     if (!response.ok) {
@@ -69,7 +66,6 @@ function App() {
   const [userId, setUserId] = useState(null)
   const [nodes, setNodes] = useState([])
   const [primaryNode, setPrimaryNode] = useState(null)
-  const [isEnabled, setIsEnabled] = useState(false)
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [deviceName, setDeviceName] = useState(null)
@@ -82,9 +78,9 @@ function App() {
     try {
       const storage = await chrome.storage.local.get('connectionId')
       const response = await fetch(
-        `${API_URL}/.netlify/functions/update-device-name`,
+        `${API_URL}/.netlify/functions/auth-devices`,
         {
-          method: 'POST',
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${apiKey}`,
@@ -97,39 +93,15 @@ function App() {
         }
       )
 
-      if (!response.ok) throw new Error('Failed to update device name')
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update device name')
+      }
+
       setDeviceName(newName)
     } catch (err) {
       console.error('Error updating device name:', err)
       setError('Failed to update device name')
-    }
-  }
-
-  // Add handler for theme changes from the shared ThemeProvider
-  const handleThemeChange = async (newTheme) => {
-    if (!userId) return
-
-    try {
-      const response = await fetch(
-        `${API_URL}/.netlify/functions/update-user-preferences`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            userId,
-            theme: newTheme,
-          }),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to update theme preference')
-      }
-    } catch (error) {
-      console.error('Failed to sync theme preference:', error)
     }
   }
 
@@ -143,7 +115,7 @@ function App() {
 
         if (storedApiKey && storedUserId) {
           const prefsData = await fetchUserPreferences(storedUserId, setError)
-          if (!prefsData || !prefsData.connections?.length) {
+          if (!prefsData || !prefsData.devices?.length) {
             await chrome.storage.local.clear()
             setApiKey(null)
             setUserId(null)
@@ -153,13 +125,8 @@ function App() {
             return
           }
 
-          // Set initial theme from user preferences
-          if (prefsData.theme) {
-            setInitialTheme(prefsData.theme)
-          }
-
-          setDeviceName(prefsData.connections[0].deviceName)
-
+          setInitialTheme(prefsData.theme || 'dark')
+          setDeviceName(prefsData.devices[0].deviceName)
           setApiKey(storedApiKey)
           setUserId(storedUserId)
           setIsLinked(true)
@@ -187,9 +154,21 @@ function App() {
     fetchLatestData()
   }, [])
 
+  useEffect(() => {
+    if (userId) {
+      const refreshTheme = async () => {
+        const prefs = await fetchUserPreferences(userId, setError)
+        if (prefs?.theme) {
+          setInitialTheme(prefs.theme)
+        }
+      }
+      refreshTheme()
+    }
+  }, [userId])
+
   if (error) {
     return (
-      <div className='alert alert-error shadow-lg rounded-lg p-4 mb-6'>
+      <div className='alert alert-error shadow-lg p-4 mb-6'>
         <span>{error}</span>
       </div>
     )
@@ -200,13 +179,9 @@ function App() {
 
     try {
       setError(null)
-      console.log(
-        'Attempting to verify code at:',
-        `${API_URL}/.netlify/functions/verify-link-code`
-      )
 
       const response = await fetch(
-        `${API_URL}/.netlify/functions/verify-link-code`,
+        `${API_URL}/.netlify/functions/auth-link-verify`,
         {
           method: 'POST',
           headers: {
@@ -216,47 +191,29 @@ function App() {
         }
       )
 
-      console.log('Response status:', response.status)
       const data = await response.json()
-      console.log('Complete link response data:', data)
-
-      // Add log for condition that's failing
-      if (data.connection) {
-        console.log('Connection data received:', data.connection)
-      } else {
-        console.log('No connection data in response')
-      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to verify code')
       }
 
-      // Store API key and userId
       await setStoredCredentials(data.apiKey, data.userId)
-      console.log('Stored credentials:', {
-        apiKey: data.apiKey,
-        userId: data.userId,
-      })
 
       setApiKey(data.apiKey)
       setUserId(data.userId)
       setIsLinked(true)
 
       if (data.connection?.id) {
-        console.log('Storing connection ID:', data.connection.id)
-
         const platformInfo = await chrome.runtime.getPlatformInfo()
         const browserInfo = navigator.userAgent.match(/Chrome\/([0-9.]+)/)[1]
         const defaultName = `Chrome ${browserInfo} on ${platformInfo.os}`
 
-        // Let user customize the name
         const customName = window.prompt('Device name:', defaultName)
 
         await chrome.storage.local.set({ connectionId: data.connection.id })
 
-        // Save the device name
-        await fetch(`${API_URL}/.netlify/functions/update-device-name`, {
-          method: 'POST',
+        await fetch(`${API_URL}/.netlify/functions/auth-devices`, {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${data.apiKey}`,
@@ -271,11 +228,9 @@ function App() {
         setDeviceName(customName || defaultName)
       }
 
-      // Fetch initial nodes
       const nodesData = await fetchUserNodes(data.userId, data.apiKey, setError)
       if (nodesData) {
         setNodes(nodesData)
-        // Find and set primary node
         const primary = nodesData.find((node) => node.isPrimary)
         if (primary) {
           setPrimaryNode(primary.node)
@@ -287,69 +242,28 @@ function App() {
     }
   }
 
-  const handleToggleProxy = async (enabled) => {
-    if (!primaryNode) {
-      setError('No primary node selected')
-      return
-    }
-
-    try {
-      if (enabled) {
-        // Configure Chrome proxy settings
-        const config = {
-          mode: 'fixed_servers',
-          rules: {
-            singleProxy: {
-              scheme: primaryNode.protocol.toLowerCase(),
-              host: primaryNode.ipAddress,
-              port: primaryNode.port,
-            },
-          },
-        }
-
-        await chrome.proxy.settings.set({
-          value: config,
-          scope: 'regular',
-        })
-      } else {
-        // Clear proxy settings
-        await chrome.proxy.settings.clear({
-          scope: 'regular',
-        })
-      }
-      setIsEnabled(enabled)
-    } catch (err) {
-      console.error('Proxy toggle error:', err)
-      setError(`Failed to ${enabled ? 'enable' : 'disable'} proxy`)
-    }
-  }
-
   const handleUnlink = async () => {
     try {
       const storage = await chrome.storage.local.get(['connectionId', 'apiKey'])
-      console.log('Storage before unlink:', storage)
 
-      const headers = await getAuthHeaders()
-      console.log('Headers:', headers)
-
-      if (storage.connectionId && storage.apiKey) {
+      if (storage.connectionId) {
         const response = await fetch(
-          `${API_URL}/.netlify/functions/manage-extension-connection`,
+          `${API_URL}/.netlify/functions/auth-devices`,
           {
-            method: 'POST',
-            headers,
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${storage.apiKey}`,
+            },
             body: JSON.stringify({
-              action: 'revoke',
+              userId,
               connectionId: storage.connectionId,
-              userId: userId,
             }),
           }
         )
 
-        const data = await response.json()
-        console.log('Unlink response:', { status: response.status, data })
-
         if (!response.ok) {
+          const data = await response.json()
           throw new Error(data.error || 'Failed to revoke connection')
         }
       }
@@ -361,164 +275,167 @@ function App() {
       setPrimaryNode(null)
       setNodes([])
     } catch (error) {
-      console.error('Unlink error details:', error)
+      console.error('Unlink error:', error)
       setError(error.message || 'Failed to unlink extension')
     }
   }
 
   if (isLoading) {
     return (
-      <div className='flex justify-center items-center'>
-        <span className='loading loading-spinner text-primary'></span>
+      <div className='flex justify-center items-center h-screen'>
+        <span className='loading loading-spinner text-content'></span>
       </div>
     )
   }
 
   return (
-    <ThemeProvider
-      initialTheme={initialTheme}
-      onThemeChange={handleThemeChange}
-      storageKey='bore-extension-theme'
-    >
-      <div className='min-h-screen'>
-        {isLinked && (
-          <div className='text-xs mb-4 flex justify-between items-center'>
-            <span>{deviceName}</span>
-            <button
-              onClick={handleEditDeviceName}
-              className='text-primary hover:text-primary-focus'
-            >
-              Edit
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div className='alert alert-error shadow-lg rounded-lg p-4 mb-6'>
-            <span>{error}</span>
-          </div>
-        )}
-
-        {isLinked ? (
-          <div>
-            <div className='mb-6'>
-              <ToggleSwitch
-                enabled={isEnabled}
-                onToggle={handleToggleProxy}
-              />
+    <ThemeProvider initialTheme={initialTheme}>
+      <div className='min-h-screen flex flex-col border-2'>
+        <div className='flex-1 pb-16'>
+          {isLinked && (
+            <div className='text-xs mb-4 flex justify-between items-center'>
+              <span>{deviceName}</span>
+              <button
+                onClick={handleEditDeviceName}
+                className='text-primary hover:text-primary-focus'
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='0.5'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  className='lucide lucide-pencil-line'
+                >
+                  <path d='M12 20h9' />
+                  <path d='M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z' />
+                  <path d='m15 5 3 3' />
+                </svg>
+              </button>
             </div>
-
-            <div className='mb-6'>
-              <PrimaryNode node={primaryNode} />
+          )}
+          {error && (
+            <div className='alert alert-error shadow-lg p-4 mb-6'>
+              <span>{error}</span>
             </div>
+          )}
+          {isLinked ? (
+            <div>
+              <div className='sticky top-0 z-10 bg-base-100 mb-4'>
+                <PrimaryNode node={primaryNode} />
+              </div>
 
-            <div className='mb-6'>
-              <NodeList
-                nodes={nodes.map((n) => n.node)} // Transform to expected structure
-                primaryNodeId={nodes.find((n) => n.isPrimary)?.node.id}
-                onSetPrimary={async (nodeId) => {
-                  try {
-                    const response = await fetch(
-                      `${API_URL}/.netlify/functions/set-primary-node`,
-                      {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          Authorization: `Bearer ${apiKey}`,
-                        },
-                        body: JSON.stringify({
-                          userId,
-                          nodeId,
-                        }),
-                      }
-                    )
-
-                    const data = await response.json()
-
-                    if (!response.ok) {
-                      throw new Error(
-                        data.error || 'Failed to set primary node'
+              <div className='overflow-y-scroll max-h-[calc(100vh-10rem)] mb-6 p-4'>
+                <NodeList
+                  nodes={nodes.map((n) => n.node)}
+                  primaryNodeId={nodes.find((n) => n.isPrimary)?.node.id}
+                  onSetPrimary={async (nodeId) => {
+                    try {
+                      const response = await fetch(
+                        `${API_URL}/.netlify/functions/nodes-saved`,
+                        {
+                          method: 'PUT',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${apiKey}`,
+                          },
+                          body: JSON.stringify({
+                            userId,
+                            nodeId,
+                          }),
+                        }
                       )
-                    }
 
-                    await fetchUserNodes(userId, apiKey, setError)
-                  } catch (err) {
-                    console.error('Error setting primary node:', err)
-                    setError('Failed to set primary node')
+                      const data = await response.json()
+
+                      if (!response.ok) {
+                        throw new Error(
+                          data.error || 'Failed to set primary node'
+                        )
+                      }
+
+                      const updatedNodes = await fetchUserNodes(
+                        userId,
+                        apiKey,
+                        setError
+                      )
+                      if (updatedNodes) {
+                        setNodes(updatedNodes)
+                        const primary = updatedNodes.find(
+                          (node) => node.isPrimary
+                        )
+                        if (primary) {
+                          setPrimaryNode(primary.node)
+                        }
+                      }
+                    } catch (err) {
+                      console.error('Error setting primary node:', err)
+                      setError('Failed to set primary node')
+                    }
+                  }}
+                />
+              </div>
+              <button
+                onClick={handleUnlink}
+                className='btn btn-error btn-block mb-6'
+              >
+                Unlink Extension
+              </button>
+            </div>
+          ) : (
+            <div className='p-6'>
+              <h1 className='text-2xl font-semibold mb-4'>Welcome to Bore</h1>
+              <p className='mb-4'>
+                Go to{' '}
+                <a
+                  href='http://localhost:9999/register'
+                  className='link'
+                >
+                  bore.nil.computer/register
+                </a>{' '}
+                and create your account big guy
+              </p>
+              <p className='mb-4'>Then enter the 8-digit code below</p>
+              <h2 className='text-xl font-semibold mb-4'>Link Your Account</h2>
+              <p className='text-base mb-4'>
+                Enter the 8-digit code from your account
+              </p>
+              <input
+                type='text'
+                className='input input-bordered w-full mb-4'
+                placeholder='Enter code'
+                value={linkCode}
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (value.length <= 8) {
+                    setLinkCode(value)
                   }
                 }}
+                maxLength={8}
               />
-            </div>
-            <button
-              onClick={handleUnlink}
-              className='btn btn-error btn-block mb-6'
-            >
-              Unlink Extension
-            </button>
-          </div>
-        ) : (
-          <div className='p-6'>
-            <svg
-              width='24'
-              height='24'
-              viewBox='0 0 900 900'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <g id='Group'>
-                <path
-                  id='Circular-Outer'
-                  fill='#01D452'
-                  fill-rule='evenodd'
-                  stroke='none'
-                  d='M 450 900 C 201.472229 900 0 698.527893 0 450 C 0 201.472107 201.472229 0 450 0 C 698.527832 0 900 201.472107 900 450 C 900 698.527893 698.527832 900 450 900 Z M 450 830.232544 C 659.996399 830.232544 830.232544 659.996399 830.232544 450 C 830.232544 240.003601 659.996399 69.767456 450 69.767456 C 240.003586 69.767456 69.767448 240.003601 69.767448 450 C 69.767448 659.996399 240.003586 830.232544 450 830.232544 Z'
-                />
-                <path
-                  id='Shape-Middle'
-                  fill='#01D452'
-                  fill-rule='evenodd'
-                  stroke='none'
-                  d='M 450 668 C 329.602112 668 232 570.397949 232 450 C 232 329.602051 329.602112 232 450 232 C 570.397888 232 668 329.602051 668 450 C 668 570.397949 570.397888 668 450 668 Z M 450 634.201538 C 551.731567 634.201538 634.201599 551.731567 634.201599 450 C 634.201599 348.268433 551.731567 265.798401 450 265.798401 C 348.268402 265.798401 265.798462 348.268433 265.798462 450 C 265.798462 551.731567 348.268402 634.201538 450 634.201538 Z'
-                />
-              </g>
-            </svg>
-            <p className='mb-4'>
-              Go to{' '}
-              <a
-                href='http://localhost:8888/register'
-                className='link'
-              >
-                bore.nil.computer/register
-              </a>{' '}
-              and create your account big guy
-            </p>
-            <p className='mb-4'>Then enter the 8-digit code below</p>
-            <h2 className='text-xl font-semibold mb-4'>Link Your Account</h2>
-            <p className='text-base mb-4'>
-              Enter the 8-digit code from your account
-            </p>
-            <input
-              type='text'
-              className='input input-bordered w-full mb-4'
-              placeholder='Enter code'
-              value={linkCode}
-              onChange={(e) => {
-                const value = e.target.value
-                if (value.length <= 8) {
-                  setLinkCode(value) // Allow letters and numbers
-                }
-              }}
-              maxLength={8} // This ensures no input beyond 6 characters
-            />
 
-            <button
-              className='btn btn-primary w-full'
-              onClick={handleVerifyCode}
-              disabled={linkCode.length !== 8}
-            >
-              Link Account
-            </button>
+              <button
+                className='btn btn-primary w-full'
+                onClick={handleVerifyCode}
+                disabled={linkCode.length !== 8}
+              >
+                Link Account
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className='navbar bg-base-300 fixed bottom-0 left-0 w-full'>
+          <div className='flex justify-around w-full'>
+            <button className='btn btn-ghost btn-sm'>Home</button>
+            <button className='btn btn-ghost btn-sm'>Nodes</button>
+            <button className='btn btn-ghost btn-sm'>Settings</button>
           </div>
-        )}
+        </div>
       </div>
     </ThemeProvider>
   )

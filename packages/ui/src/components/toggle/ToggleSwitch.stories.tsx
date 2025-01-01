@@ -1,44 +1,57 @@
 // packages/ui/src/components/toggle/ToggleSwitch.stories.tsx
-import type { Meta, StoryObj } from '@storybook/react'
-import { ToggleSwitch } from './ToggleSwitch'
+import type { Meta, StoryObj } from '@storybook/react';
+import { ToggleSwitch } from './ToggleSwitch';
 
-const meta: Meta<typeof ToggleSwitch> = {
+const meta = {
+  title: 'UI/ToggleSwitch',
   component: ToggleSwitch,
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
   argTypes: {
     enabled: {
+      description: 'Whether the toggle is on or off',
       control: 'boolean',
-      description: 'Toggle state'
     },
     onToggle: {
-      action: 'toggled',
-      description: 'Callback when toggle state changes'
+      description: 'Toggle handler function',
+      action: 'toggled'
     },
     label: {
-      control: 'text',
-      description: 'Optional label text'
+      description: 'Optional label text',
+      control: 'text'
     }
   }
-}
+} satisfies Meta<typeof ToggleSwitch>;
 
-export default meta
-type Story = StoryObj<typeof ToggleSwitch>
+export default meta;
+type Story = StoryObj<typeof ToggleSwitch>;
 
 export const Default: Story = {
   args: {
     enabled: false,
-    label: 'Toggle Switch'
+    label: 'Toggle Feature'
   }
-}
+};
 
 export const Enabled: Story = {
   args: {
     enabled: true,
-    label: 'Toggle Switch'
+    label: 'Feature Enabled'
   }
-}
+};
 
-export const NoLabel: Story = {
+export const WithoutLabel: Story = {
   args: {
     enabled: false
   }
-}
+};
+
+export const CustomSize: Story = {
+  args: {
+    enabled: false,
+    label: 'Large Toggle',
+    className: 'toggle-lg'
+  }
+};

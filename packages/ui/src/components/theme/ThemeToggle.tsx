@@ -12,13 +12,13 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
   return (
     <button
       onClick={toggleTheme}
-      className={`p-2 rounded-lg bg-base-200 hover:bg-base-300 transition-colors ${className}`}
+      className={`p-2 rounded-sm bg-base-200 hover:bg-base-300 transition-colors ${className}`}
       aria-label="Toggle theme"
     >
       {theme === 'light' ? (
-        <Moon className="w-5 h-5" />
+        <Moon className="w-4 h-4" />
       ) : (
-        <Sun className="w-5 h-5" />
+        <Sun className="w-4 h-4" />
       )}
     </button>
   );

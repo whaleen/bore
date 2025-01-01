@@ -1,29 +1,24 @@
 [build]
 base = "apps/web"
-command = """
-cd ../..
-pnpm install
-cd apps/web
-npx prisma generate
-cd ../..
-pnpm run build:web
-"""
 publish = "dist"
 functions = "netlify/functions"
 
-[functions]
-node_bundler = "esbuild"
-external_node_modules = ["@prisma/client"]
-
 [dev]
 framework = "#custom"
-command = "pnpm run dev"
+command = "npx vite"
 targetPort = 5173
-port = 8888
-publish = "dist"
-autoLaunch = true
+port = 9999
+
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/:splat"
+status = 200
 
 [[redirects]]
 from = "/*"
 to = "/index.html"
 status = 200
+
+[functions]
+node_bundler = "esbuild"
+external_node_modules = ["@prisma/client"]

@@ -1,41 +1,39 @@
 // packages/ui/src/components/nodes/NodeListItem.tsx
-import { Badge } from '../badge/Badge';
 import { NodeListItemProps } from './types';
+import { Flag } from '../flag/Flag';
 
 const NodeListItem = ({
   node,
-  isPrimary = false,
   onRemove,
   onSetPrimary,
   className = ''
 }: NodeListItemProps) => {
   return (
-    <div className={`flex items-center justify-between p-3 border border-base-300 rounded-lg ${className}`}>
-      <div className="flex items-center gap-3">
-        <img
-          src={`/api/placeholder/20/15`}
-          alt={`${node.country} flag`}
+    <div
+      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border border-base-300 rounded-lg ${className}`}
+    >
+      {/* Left Section: Flag and Node Info */}
+      <div className="flex items-center gap-3 w-full sm:w-auto">
+        <Flag
+          countryCode={node.countryCode}
+          size={20}
           className="rounded"
         />
 
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{node.name}</span>
-            {isPrimary && (
-              <Badge className="bg-primary text-primary-content text-xs">Primary</Badge>
-            )}
-          </div>
-          <div className="text-sm text-base-content/70">
+        <div className="flex-1 min-w-0">
+          <div className="font-medium truncate">{node.name}</div>
+          <div className="text-sm text-base-content/70 truncate">
             {node.country} • {node.ipAddress}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        {!isPrimary && onSetPrimary && (
+      {/* Right Section: Button Group */}
+      <div className="flex gap-2 mt-3 sm:mt-0">
+        {onSetPrimary && (
           <button
             onClick={onSetPrimary}
-            className="btn btn-sm btn-outline"
+            className="btn btn-xs"
           >
             Set Primary
           </button>
@@ -43,7 +41,7 @@ const NodeListItem = ({
         {onRemove && (
           <button
             onClick={onRemove}
-            className="btn btn-sm btn-ghost text-error"
+            className="btn btn-xs btn-error"
           >
             Remove
           </button>
@@ -52,5 +50,7 @@ const NodeListItem = ({
     </div>
   );
 };
+
+
 
 export default NodeListItem;

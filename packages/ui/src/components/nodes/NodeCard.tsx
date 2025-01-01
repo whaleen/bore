@@ -1,5 +1,6 @@
 // packages/ui/src/components/nodes/NodeCard.tsx
 import { Badge } from '../badge/Badge';
+import { Flag } from '../flag/Flag'
 import { NodeCardProps } from './types';
 
 const NodeCard = ({
@@ -18,9 +19,9 @@ const NodeCard = ({
           <div>
             <h3 className="text-lg font-semibold">{node.name}</h3>
             <div className="flex items-center gap-2 mt-1">
-              <img
-                src={`/api/placeholder/20/15`}
-                alt={`${node.country} flag`}
+              <Flag
+                countryCode={node.countryCode}
+                size={20}
                 className="rounded"
               />
               <span className="text-sm text-base-content/70">

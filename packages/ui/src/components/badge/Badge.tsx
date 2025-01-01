@@ -24,7 +24,7 @@ export const Badge = ({
   return (
     <span
       className={`
-        inline-flex items-center justify-center font-medium rounded-full
+        inline-flex items-center justify-center font-medium
         ${variantClasses[variant]}
         ${sizeClasses[size]}
         ${className}
