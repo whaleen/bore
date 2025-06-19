@@ -1,17 +1,82 @@
-# Bore Monorepo
+# Bore
 
-Our web (front-end), and chrome-extension apps are here: `apps/`
+**Web3-enabled proxy/VPN node management platform** with Solana authentication, Chrome extension, and cloud infrastructure integration.
 
-### API
+## Overview
 
-Criticial: When we update the Prisma schema, we'll need to update our types.ts in `netlfy/functions` to make sure our API types align with the database changes.
+Bore is a decentralized proxy/VPN node management system that enables users to:
 
-Maybe we will prefix function names using crud conventions like `createUser`, `updateUser`, `deleteUser`, `getUser`, `getUsers` etc.
+- **Manage Proxy Nodes**: Deploy, configure, and monitor proxy servers across multiple regions
+- **Web3 Authentication**: Secure login using Solana wallet integration (Phantom wallet support)
+- **Chrome Extension**: Browser-based proxy management and configuration
+- **Cloud Integration**: Automated node deployment via Vultr cloud infrastructure
+- **Multi-Device Support**: Synchronize proxy settings across devices with secure API key authentication
 
-We may need to refator our endpoints to become more atomic to achieve the above CRUD nameing conventions.
+## Architecture
 
-### Development Scripts
+This is a **monorepo** containing:
 
-web: `pnpm run dev:web` - Run the web app in development mode from the root directory using the root package.json.
+- **Web App** (`apps/web/`): React-based dashboard for node management
+- **Chrome Extension** (`apps/chrome-extension/`): Browser extension for proxy control
+- **Shared UI** (`packages/`): Common components and utilities
 
-chrome-extension: `pnpm dlx vite --config vite.config.js` - Run vite with custom config file from teh chrome-extension directory directly. The fancy turbo mode running everything from root is a good way to drive yourself crazy.
+## Tech Stack
+
+- **Frontend**: React, TypeScript, Tailwind CSS, DaisyUI
+- **Backend**: Netlify Functions, PostgreSQL, Prisma ORM
+- **Authentication**: Solana Web3.js, Wallet Adapter
+- **Infrastructure**: Vultr API, Chrome Extension APIs
+- **Development**: Turbo (monorepo), Vite, pnpm, Storybook
+
+## Database Schema
+
+Core entities managed by the platform:
+
+- **Users**: Solana wallet-based authentication
+- **Nodes**: Proxy server configurations (IP, port, protocol, region)
+- **DeviceAuth**: API keys for Chrome extension authentication
+- **UserSavedNodes**: User's saved proxy configurations
+- **LinkCodes**: Temporary codes for device linking
+
+## Development
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm package manager
+- PostgreSQL database
+- Solana wallet (for testing)
+
+### Getting Started
+
+```bash
+# Install dependencies
+pnpm install
+
+# Generate Prisma client
+pnpm run prisma:generate
+
+# Start web app
+pnpm run dev:web
+
+# Start Chrome extension (run from chrome-extension directory)
+pnpm run dev:chrome-extension
+```
+
+### Scripts
+
+- `pnpm run dev:web` - Run web app in development mode
+- `pnpm run build:web` - Build web app for production
+- `pnpm run dev:chrome-extension` - Run Chrome extension in development
+- `pnpm run build:chrome-extension` - Build Chrome extension
+- `pnpm run storybook` - Run component storybook
+
+### API Development
+
+**Important**: When updating the Prisma schema, update `netlify/functions/types.ts` to align API types with database changes.
+
+API endpoints follow CRUD conventions: `createUser`, `updateUser`, `deleteUser`, `getUser`, `getUsers`, etc.
+
+## License
+
+MIT
