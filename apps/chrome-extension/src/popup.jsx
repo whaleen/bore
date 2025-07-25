@@ -425,10 +425,10 @@ function App() {
               <p className='mb-4'>
                 Go to{' '}
                 <a
-                  href='http://localhost:9999/register'
+                  href='https://bore.ndao.computer/register'
                   className='link'
                 >
-                  bore.nil.computer/register
+                  bore.ndao.computer/register
                 </a>{' '}
                 and create your account big guy
               </p>

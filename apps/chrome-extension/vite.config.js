@@ -17,7 +17,7 @@ export default defineConfig({
   },
   define: {
     'process.env': {
-      SITE_URL: JSON.stringify(process.env.SITE_URL || 'https://bore.nil.computer'),
+      SITE_URL: JSON.stringify(process.env.SITE_URL || 'https://bore.ndao.computer'),
     },
   },
   server: {
