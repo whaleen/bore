@@ -2,7 +2,7 @@
 base = "apps/web"
 publish = "dist"
 functions = "netlify/functions"
-command = "npm run prisma:generate && npm run build"
+command = "cd ../.. && npm run prisma:generate && npm run build --workspace=@bore/web"
 
 [dev]
 framework = "#custom"
