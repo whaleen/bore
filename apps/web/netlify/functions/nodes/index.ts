@@ -121,13 +121,19 @@ const handler: Handler = async (event) => {
 
       case 'PUT':
         // Add logic to handle PUT requests for updating a node
-        // ...
-        break
+        return {
+          statusCode: 501,
+          headers,
+          body: JSON.stringify({ error: 'PUT method not implemented yet' }),
+        }
 
       case 'DELETE':
         // Add logic to handle DELETE requests for deleting a node
-        // ...
-        break
+        return {
+          statusCode: 501,
+          headers,
+          body: JSON.stringify({ error: 'DELETE method not implemented yet' }),
+        }
 
       default:
         return {
