@@ -1,9 +1,8 @@
 // packages/ui/src/components/nodes/NodeDirectoryNavigation.tsx
 import React from 'react'
 import { Search } from 'lucide-react'
-import { Button } from '../button/Button'
-import { CountrySelect } from '../form/CountrySelect'
-import { InputField } from '../form/InputField'
+import { Button } from '../button'
+import { CountrySelect, InputField } from '../form'
 
 export interface NodeDirectoryNavigationProps {
   onFiltersChange: (filters: {

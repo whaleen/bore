@@ -1,7 +1,7 @@
 // packages/ui/src/components/nodes/PrimaryNode.tsx
 import { Node } from './types'
-import { Flag } from '../flag/Flag';
-import { EmptyPrimaryNode } from '../empty-states/EmptyPrimaryNode';
+import { Flag } from '../flag';
+import { EmptyPrimaryNode } from '../empty-states';
 
 interface PrimaryNodeProps {
   node: Node | null;

@@ -1,6 +1,6 @@
 // packages/ui/src/components/nodes/NodeCard.tsx
-import { Badge } from '../badge/Badge';
-import { Flag } from '../flag/Flag'
+import { Badge } from '../badge';
+import { Flag } from '../flag'
 import { NodeCardProps } from './types';
 
 const NodeCard = ({

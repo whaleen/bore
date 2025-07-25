@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { SelectField } from '../../../ui/form/SelectField'
-import { InputField } from '../../../ui/form/InputField'
-import { Button } from '../../../ui/button/Button'
-import { Textarea } from '../../../ui/form/Textarea'
+import { SelectField, InputField, Textarea } from '../../../ui/form'
+import { Button } from '../../../ui/button'
 
 interface VultrPlan {
   id: string

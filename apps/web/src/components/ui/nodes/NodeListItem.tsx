@@ -1,6 +1,6 @@
 // packages/ui/src/components/nodes/NodeListItem.tsx
 import { NodeListItemProps } from './types';
-import { Flag } from '../flag/Flag';
+import { Flag } from '../flag';
 
 const NodeListItem = ({
   node,
