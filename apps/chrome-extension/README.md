@@ -19,9 +19,10 @@ git clone [repository-url]
 cd bore-proxy-extension
 ```
 
-2. Install dependencies
+2. Install dependencies from monorepo root
 
 ```bash
+cd ../..
 npm install
 ```
 

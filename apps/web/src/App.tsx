@@ -6,7 +6,8 @@ import AccountPage from './components/pages/AccountPage'
 import RegisterPage from './components/pages/RegisterPage'
 import WalletConnection from './components/features/wallet/WalletConnection'
 import ProxySubmissionForm from './components/features/node/ProxySubmissionForm'
-import { ThemeToggle, ThemeProvider } from '@bore/ui'
+import VultrNodeCreator from './components/features/node/VultrNodeCreator'
+import { ThemeToggle, ThemeProvider } from './components/ui/theme'
 import { useWallet } from '@solana/wallet-adapter-react'
 
 function App() {
@@ -64,6 +65,12 @@ function App() {
                   )}
                   <div className='hidden lg:flex gap-4'>
                     <Link
+                      to='/vultr'
+                      className='hover:text-primary'
+                    >
+                      Vultr Instances
+                    </Link>
+                    <Link
                       to='/register'
                       className='hover:text-primary'
                     >
@@ -104,6 +111,10 @@ function App() {
                 <Route
                   path='/submit'
                   element={<ProxySubmissionForm />}
+                />
+                <Route
+                  path='/vultr'
+                  element={<VultrNodeCreator />}
                 />
               </Routes>
             </div>

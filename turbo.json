@@ -10,9 +10,5 @@
       "persistent": true,
       "dependsOn": ["^build"]
     },
-    "storybook": {
-      "dependsOn": ["build"],
-      "outputs": []
-    }
   }
 }

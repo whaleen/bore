@@ -11,7 +11,7 @@
 1. Install dependencies from monorepo root:
 
 ```bash
-pnpm install
+npm install
 ```
 
 2. Set up your database URL in `apps/web/.env`:
@@ -28,7 +28,7 @@ You'll need two terminal windows to run the development environment:
 
 ```bash
 cd apps/web
-pnpm run dev:vite
+npm run dev
 ```
 
 This starts the frontend on http://localhost:5173 with hot module reloading.
@@ -46,12 +46,11 @@ The frontend will automatically proxy API requests from port 5173 to the functio
 
 ## Important Notes
 
-- Do not use `pnpm run dev:web` from the monorepo root - this won't work properly with the function servers
-- Always run the dev servers from within `apps/web`
-- Make sure both servers are running for full functionality
+- You can also use `npm run dev:web` from the monorepo root which will start the full development environment
+- Make sure both servers are running for full functionality  
 - Any changes to Prisma schema require running `prisma generate` before restarting servers
 
 ## Troubleshooting
 
 - If API calls fail, verify both servers are running and the proxy port in `vite.config.js` matches the Netlify Functions port (9999)
-- If experiencing workspace dependency issues, run `pnpm install` from the monorepo root
+- If experiencing workspace dependency issues, run `npm install` from the monorepo root

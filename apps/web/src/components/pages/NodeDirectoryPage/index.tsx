@@ -1,8 +1,9 @@
 // apps/web/src/components/pages/NodeDirectoryPage/index.tsx
 import { useEffect, useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { NodeDirectory, NodeDirectoryNavigation } from '@bore/ui'
-import type { Node } from '@bore/ui'
+import { NodeDirectory } from '../../ui/nodes/NodeDirectory'
+import { NodeDirectoryNavigation } from '../../ui/nodes/NodeDirectoryNavigation'
+import type { Node } from '../../ui/nodes/types'
 
 type NodeFilters = {
   status: 'all' | 'active' | 'inactive';

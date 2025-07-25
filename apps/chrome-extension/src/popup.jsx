@@ -1,7 +1,10 @@
 // chrome-extension/src/popup.jsx
 import { useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ThemeProvider, NodeList, PrimaryNode, ToggleSwitch } from '@bore/ui'
+import { ThemeProvider } from './components/ui/theme/ThemeProvider'
+import { NodeList } from './components/ui/nodes/NodeList'
+import { PrimaryNode } from './components/ui/nodes/PrimaryNode'
+import { ToggleSwitch } from './components/ui/toggle/ToggleSwitch'
 import {
   getStoredApiKey,
   getStoredUserId,
@@ -15,22 +18,52 @@ const API_URL = 'http://localhost:9999'
 const fetchUserNodes = async (currentUserId, currentApiKey, setError) => {
   try {
     setError(null)
-    const response = await fetch(
-      `${API_URL}/.netlify/functions/nodes-saved?userId=${currentUserId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${currentApiKey}`,
-        },
-      }
-    )
+    const [nodesResponse, instancesResponse] = await Promise.all([
+      fetch(
+        `${API_URL}/.netlify/functions/nodes-saved?userId=${currentUserId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${currentApiKey}`,
+          },
+        }
+      ),
+      fetch(
+        `${API_URL}/.netlify/functions/vultr-instances?userId=${currentUserId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${currentApiKey}`,
+          },
+        }
+      )
+    ])
 
-    if (!response.ok) {
-      setError('Failed to fetch nodes')
+    if (!nodesResponse.ok && !instancesResponse.ok) {
+      setError('Failed to fetch nodes and instances')
       return null
     }
 
-    const data = await response.json()
-    return data.nodes
+    const nodesData = nodesResponse.ok ? await nodesResponse.json() : { nodes: [] }
+    const instancesData = instancesResponse.ok ? await instancesResponse.json() : { instances: [] }
+    
+    // Convert Vultr instances to node format for display
+    const vultrNodes = instancesData.instances?.map(instance => ({
+      node: {
+        id: `vultr-${instance.id}`,
+        name: instance.label,
+        country: instance.region,
+        countryCode: instance.region,
+        ipAddress: instance.mainIp || 'Pending...',
+        protocol: 'SSH',
+        port: 22,
+        region: instance.region,
+        isActive: instance.status === 'active',
+        notes: `Vultr Instance: ${instance.vultrId}`,
+        type: 'vultr'
+      },
+      isPrimary: false
+    })) || []
+
+    return [...(nodesData.nodes || []), ...vultrNodes]
   } catch (err) {
     console.error('Error fetching nodes:', err)
     setError('Failed to load your nodes')

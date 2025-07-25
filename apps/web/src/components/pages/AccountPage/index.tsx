@@ -1,8 +1,9 @@
 // app/web/src/components/pages/AccountPage/index.tsx
 import { useState, useEffect } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { NodeList, PrimaryNode } from '@bore/ui'
-import { EmptySavedNodes, NoDevice } from '@bore/ui'
+import { NodeList } from '../../ui/nodes/NodeList'
+import { PrimaryNode } from '../../ui/nodes/PrimaryNode'
+import { EmptySavedNodes, NoDevice } from '../../ui/empty-states'
 import { DeviceConnection, SavedNode } from './types'
 
 import { useNavigate } from 'react-router-dom'

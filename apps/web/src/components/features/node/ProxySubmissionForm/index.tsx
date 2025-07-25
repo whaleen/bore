@@ -2,7 +2,11 @@
 import { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { getCountriesList } from '../../../../utils/location'
-import { Button, InputField, SelectField, Checkbox, Textarea } from '@bore/ui'
+import { Button } from '../../../ui/button/Button'
+import { InputField } from '../../../ui/form/InputField'
+import { SelectField } from '../../../ui/form/SelectField'
+import { Checkbox } from '../../../ui/form/Checkbox'
+import { Textarea } from '../../../ui/form/Textarea'
 import { ProxyFormData, ProxySubmissionFormProps, CountryData } from './types'
 
 const PROTOCOLS = ['HTTP', 'HTTPS', 'SOCKS5'] as const

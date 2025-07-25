@@ -26,7 +26,7 @@ This is a **monorepo** containing:
 - **Backend**: Netlify Functions, PostgreSQL, Prisma ORM
 - **Authentication**: Solana Web3.js, Wallet Adapter
 - **Infrastructure**: Vultr API, Chrome Extension APIs
-- **Development**: Turbo (monorepo), Vite, pnpm, Storybook
+- **Development**: Turbo (monorepo), Vite, npm
 
 ## Database Schema
 
@@ -43,7 +43,7 @@ Core entities managed by the platform:
 ### Prerequisites
 
 - Node.js 18+
-- pnpm package manager
+- npm package manager
 - PostgreSQL database
 - Solana wallet (for testing)
 
@@ -51,25 +51,24 @@ Core entities managed by the platform:
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Generate Prisma client
-pnpm run prisma:generate
+npm run prisma:generate
 
 # Start web app
-pnpm run dev:web
+npm run dev:web
 
-# Start Chrome extension (run from chrome-extension directory)
-pnpm run dev:chrome-extension
+# Start Chrome extension
+npm run dev:chrome-extension
 ```
 
 ### Scripts
 
-- `pnpm run dev:web` - Run web app in development mode
-- `pnpm run build:web` - Build web app for production
-- `pnpm run dev:chrome-extension` - Run Chrome extension in development
-- `pnpm run build:chrome-extension` - Build Chrome extension
-- `pnpm run storybook` - Run component storybook
+- `npm run dev:web` - Run web app in development mode
+- `npm run build:web` - Build web app for production
+- `npm run dev:chrome-extension` - Run Chrome extension in development
+- `npm run build:chrome-extension` - Build Chrome extension
 
 ### API Development
 

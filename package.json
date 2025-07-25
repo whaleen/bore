@@ -26,20 +26,17 @@
   ],
   "author": "whaleen",
   "license": "MIT",
-  "packageManager": "pnpm@7.10.0",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "prisma:generate": "npx prisma generate --schema apps/web/prisma/schema.prisma",
-    "dev:web": "pnpm --filter @bore/web run dev",
-    "build:web": "pnpm run prisma:generate && turbo run build --filter @bore/web",
+    "dev:web": "npm run dev --workspace=@bore/web",
+    "build:web": "npm run prisma:generate && turbo run build --filter @bore/web",
     "lint:web": "turbo run lint --filter @bore/web",
-    "dev:chrome-extension": "pnpm --cwd apps/chrome-extension dlx vite --debug --config vite.config.js",
+    "dev:chrome-extension": "npm run dev --workspace=@bore/chrome-extension",
     "build:chrome-extension": "turbo run build --filter @bore/chrome-extension",
     "lint:chrome-extension": "turbo run lint --filter @bore/chrome-extension",
-    "storybook": "turbo run storybook --filter @bore/ui",
     "build": "turbo run build",
     "dev": "turbo run dev"
   },

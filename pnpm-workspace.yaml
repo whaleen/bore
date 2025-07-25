@@ -1,3 +1,0 @@
-packages:
-  - apps/* # Include all apps
-  - packages/* # Include shared packages (e.g., UI library, utilities)
