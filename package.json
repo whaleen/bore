@@ -32,7 +32,7 @@
   "scripts": {
     "prisma:generate": "npx prisma generate --schema apps/web/prisma/schema.prisma",
     "dev:web": "npm run dev --workspace=@bore/web",
-    "build:web": "npm run prisma:generate && turbo run build --filter @bore/web",
+    "build:web": "npm run prisma:generate && npm run build --workspace=@bore/web",
     "lint:web": "turbo run lint --filter @bore/web",
     "dev:chrome-extension": "npm run dev --workspace=@bore/chrome-extension",
     "build:chrome-extension": "turbo run build --filter @bore/chrome-extension",

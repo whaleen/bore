@@ -8,7 +8,7 @@
   "scripts": {
     "predev": "prisma generate",
     "dev": "netlify dev",
-    "build": "prisma generate && vite build && pnpm run build:functions",
+    "build": "vite build && npm run build:functions",
     "build:functions": "tsc -p netlify/functions/tsconfig.json",
     "seed": "node prisma/seed.js"
   },

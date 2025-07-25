@@ -3,6 +3,9 @@ base = "apps/web"
 publish = "dist"
 functions = "netlify/functions"
 
+[build]
+command = "npm run prisma:generate && npm run build"
+
 [dev]
 framework = "#custom"
 command = "npx vite"
